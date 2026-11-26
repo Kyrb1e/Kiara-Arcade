@@ -1,0 +1,39 @@
+/* Font dibundel lokal supaya tetap tampil walau laptop pameran offline */
+@font-face{font-family:"Lilita One";font-weight:400;font-style:normal;font-display:swap;src:url("../assets/fonts/LilitaOne.woff2") format("woff2")}
+@font-face{font-family:"Fredoka";font-weight:400 700;font-style:normal;font-display:swap;src:url("../assets/fonts/Fredoka.woff2") format("woff2")}
+
+:root{
+  /* palet kelompok */
+  --navy:#3f4a5e;
+  --navy-dark:#363f50;
+  --navy-deep:#2b3242;
+  --navy-ink:#232937;
+  --navy-light:#5d6c89;
+  --sky:#8fa3c7;
+  --gold:#bd8f4b;
+  --gold-dark:#8a6430;
+  --gold-light:#f3cf8c;
+  --cream:#f4f1ea;
+  --muted:#5c6577;
+
+  --display:"Lilita One","Fredoka",system-ui,sans-serif;
+  --body:"Fredoka","Segoe UI",system-ui,sans-serif;
+}
+
+/* versi cerah dari palet kelompok, untuk nuansa game */
+:root{
+  --ink:#1b1f4a;
+  --outline:#1b1f4a;
+  --royal:#3b5bdb;
+  --royal-2:#2a3fb0;
+  --royal-3:#1f2d85;
+  --rim:#9db8ff;
+  --cyan:#4fe3ff;
+  --sun-1:#ffe08a;
+  --sun-2:#ffb21e;
+  --sun-3:#f08a00;
+  --sun-ink:#9a4d00;
+  --leaf-1:#9cf06a;
+  --leaf-2:#46b52c;
+  --leaf-ink:#1f6b12;
+}
