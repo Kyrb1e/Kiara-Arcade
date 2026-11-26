@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="id" data-game="grid">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Kiara Beam</title>
+<style>
+:root{box-sizing:border-box;--ink:#0e3b43;--card:#ffffffee;--btn:#f2b705;--btnt:#2b2200}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#e8fff6;--card:#10262cee}}
+:root[data-theme="dark"]{--ink:#e8fff6;--card:#10262cee}
+html,body{height:100%;margin:0;background:#2a9d9a;font-family:"Trebuchet MS","Segoe UI",sans-serif;overflow:hidden;touch-action:manipulation;user-select:none}
+canvas{position:fixed;inset:0;width:100%;height:100%;touch-action:none}
+.pnl{background:rgba(8,28,36,.42);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-radius:12px;padding:8px 12px;line-height:1.45;color:#fff}
+#hud{position:absolute;left:0;right:0;top:env(safe-area-inset-top,0px);padding:12px;pointer-events:none;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+#ttl{font-weight:700;font-size:14px}#mv{font-size:13px;letter-spacing:.5px}
+.btns{display:flex;gap:6px}
+.btns button{pointer-events:auto;margin:0;width:42px;height:42px;padding:0;border-radius:12px;background:rgba(8,28,36,.42);color:#fff;font-size:19px}
+#leg{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 10px);width:max-content;max-width:94vw;display:flex;flex-wrap:wrap;justify-content:center;gap:4px 12px;font-size:12px;pointer-events:none}
+.sw{display:inline-block;width:13px;height:13px;border-radius:3px;margin-right:5px;vertical-align:-2px}
+.s1{background:linear-gradient(135deg,#1c3a8a,#3b64c8)}.s2{background:linear-gradient(135deg,#dbe9ff,#7aaee6)}.s3{background:linear-gradient(135deg,#ffd98a,#f0a64c)}.s4{background:#ffd84a;border-radius:50%}.s0{background:#ffb81c;border-radius:50%;box-shadow:0 0 0 2px #ffe27a}.s5{background:#c9573a}
+#toast{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 74px);transform:translateX(-50%);width:min(92vw,420px);background:rgba(8,28,36,.78);color:#fff;border-radius:14px;padding:10px 14px;font-size:13px;line-height:1.45;pointer-events:none;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+#toast b{display:block;color:#ffe27a;font-size:12px;margin-bottom:2px}
+#ov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:var(--card);color:var(--ink);border-radius:18px;padding:22px 20px 18px;width:min(100%,380px);max-height:100%;overflow:auto;text-align:center;box-shadow:0 12px 40px #0005;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.card h1{font-size:25px;margin:0 0 8px;font-weight:600}
+.card p{margin:6px 0;font-size:14px;line-height:1.5}
+.big{font-size:44px;margin:4px 0;color:#e0a800;letter-spacing:4px}
+button{margin-top:14px;background:var(--btn);color:var(--btnt);border:0;border-radius:10px;padding:12px 26px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit}
+button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+button:disabled{opacity:.35;cursor:default}
+.alt{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink)}
+.row{display:flex;gap:8px}.row button{flex:1;margin-top:10px;padding:12px 8px}
+.lvg{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px}
+.lvg button{margin:0;padding:8px 0;display:flex;flex-direction:column;align-items:center;gap:1px;border-radius:12px}
+.lvg b{font-size:20px}.lvg small{font-size:10px;letter-spacing:0}
+.how{display:flex;flex-direction:column;gap:4px;text-align:left;font-size:13px;margin:8px 0 0;line-height:1.4}
+.edu{background:rgba(242,183,5,.18);border-radius:12px;padding:8px 12px;margin-top:8px;text-align:left;font-size:13px;line-height:1.45}
+.edu b{display:block;font-size:12px;margin-bottom:2px}
+.rec{display:inline-block;background:var(--btn);color:var(--btnt);font-size:12px;font-weight:700;border-radius:999px;padding:3px 10px;margin-bottom:6px}
+.hide{display:none!important}
+#toast{bottom:calc(env(safe-area-inset-bottom,0px) + var(--lh,40px) + 18px);pointer-events:auto}
+@media (max-width:520px),(max-height:520px){
+ #hud{padding:8px}
+ .pnl{padding:6px 10px;border-radius:10px}
+ #hud>.pnl:first-child{flex:1;min-width:0}
+ #ttl{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ #mv{font-size:12px;letter-spacing:0}
+ .btns button{width:44px;height:44px}
+ #leg{font-size:11px;gap:2px 10px;padding:5px 8px;bottom:calc(env(safe-area-inset-bottom,0px) + 6px)}
+ #toast{font-size:12px;padding:8px 12px}
+ .card{padding:18px 16px 14px;border-radius:16px}
+ .card h1{font-size:22px}
+ .how{font-size:12.5px}
+ .lvg{gap:6px}.lvg button{min-height:54px}
+ button{min-height:44px}
+}
+#bkx{position:fixed;z-index:50;top:calc(env(safe-area-inset-top,0px) + 12px);right:110px;width:42px;height:42px;min-height:0;margin:0;padding:0;display:flex;align-items:center;justify-content:center;border:0;border-radius:12px;background:rgba(8,28,36,.42);color:#fff;font:700 26px/1 "Trebuchet MS",sans-serif;letter-spacing:0;text-transform:none;box-shadow:none;cursor:pointer}
+#bkx:focus-visible{outline:3px solid #fff;outline-offset:2px}
+#ov[style*="flex-end"]{z-index:30;align-items:flex-start!important;background:#0f7a74;padding:calc(env(safe-area-inset-top,0px) + 64px) 20px calc(env(safe-area-inset-bottom,0px) + 28px);overflow:auto;animation:pgin .3s ease-out}
+#ov[style*="flex-end"] .card{--ink:#fff;--card:transparent;background:transparent;color:#fff;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;max-height:none;overflow:visible;width:min(100%,420px);margin:auto;padding:0;text-align:center}
+#ov[style*="flex-end"] .card:has(.big)::before{content:"Hasil permainan";display:block;font-size:13px;letter-spacing:4px;text-transform:uppercase;opacity:.75;margin-bottom:14px}
+#ov[style*="flex-end"] .big{font-size:96px;font-weight:900;line-height:1;margin:6px 0}
+#ov[style*="flex-end"] .card h1{font-size:30px;font-weight:900}
+@keyframes pgin{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+</style>
+<script src="../js/teks.js?v=202611261444"></script>
+<script src="../js/kontrol.js?v=202611261444"></script>
+<link rel="stylesheet" href="../css/fonts.css?v=202611261444">
+<link rel="stylesheet" href="../css/game.css?v=202611261444">
+<script>try{document.fonts.load('700 16px Fredoka');document.fonts.load('16px "Lilita One"')}catch(e){}</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud" class="hide"><div class="pnl"><div id="ttl"></div><div id="mv"></div></div><div class="btns"><button id="rst" aria-label="Ulangi level">&#8635;</button><button id="mnb" aria-label="Menu">&#9776;</button></div></div>
+<div id="toast" class="hide" role="status" aria-live="polite"></div>
+<div id="leg" class="pnl hide"><span><i class="sw s0"></i>Matahari</span><span><i class="sw s2"></i>Cermin</span><span><i class="sw s3"></i>Prisma</span><span><i class="sw s1"></i>Panel</span><span><i class="sw s4"></i>Lampu</span><span><i class="sw s5"></i>Halangan</span></div>
+<div id="ov"><div class="card" id="card"></div></div>
+<script>
+/* Kiara Beam. Teman dari "Kiara Stack".
+   Kode sel: . kosong | # bangunan | T pohon | S semak | C awan mendung | P panel surya (target sinar) | L lampu PJU (menyala jika panel di sebelahnya kena sinar) | a cermin "/" | b cermin "\" (bisa diputar) | A,B cermin terkunci | p,q prisma pembagi "/" "\"
+   Level: s=[x,y,arah] arah 0 kanan,1 bawah,2 kiri,3 atas | mv batas langkah | o langkah terbaik (diverifikasi solver, solusi optimal unik). */
+const $=id=>document.getElementById(id);
+const cv=$('c'),ctx=cv.getContext('2d'),card=$('card'),ov=$('ov'),toast=$('toast'),hud=$('hud'),leg=$('leg');
+const DX=[1,0,-1,0],DY=[0,1,0,-1],MS={0:3,3:0,2:1,1:2},MB={0:1,1:0,2:3,3:2};
+const LV=[
+{n:'Terang Pertama',t:'Matahari memberi energi. Ketuk cermin untuk memutarnya sampai sinar mengenai lampu.',mv:3,o:1,s:[0,4,0],g:['....L','.....','.....','.....','....b']},
+{n:'Tikungan Kampung',t:'Bangunan dan pohon menghalangi cahaya, seperti bayangan yang menutupi panel surya.',mv:5,o:3,s:[0,3,0],g:['##....','.T....','T.T...','..b...','.b..L#','.ab...']},
+{n:'Dua Arah',t:'Prisma membagi satu sinar menjadi dua, seperti satu sumber energi yang melayani beberapa lampu.',mv:6,o:4,s:[4,5,3],g:['..L..T','#...L.','.T....','.b..p#','......','#abT..']},
+{n:'Simpang Gelap',t:'Misi: nyalakan tiga tiang PJU di simpang gelap lewat celah sempit antar bangunan. Baterai tiang penuh saat lampu menyala kuning terang.',mv:5,o:4,s:[1,6,3],g:['....L.a','..a.q.L','....q.L','...#.#.','.b..b..','...#.#T','......T']},
+{n:'Dua Cabang',t:'Cermin gelap berbaut terpasang permanen dan tidak bisa diputar. Rencanakan jalur sinar dengan memperhitungkannya.',mv:6,o:5,s:[3,0,1],g:['#....#.','.......','b..q#..','L...b.L','.......','T#...T.','AT.ab#.']},
+{n:'Persimpangan',t:'Solar charge controller mengatur ke mana energi mengalir. Di sini kamu yang menjadi controller.',mv:7,o:6,s:[0,3,0],g:['..ba.T.','T.q...a','TT.....','..b....','.....B.','TT.a.LL','.#.#...']},
+{n:'Gang Sempit',t:'Satu sumber bisa menyalakan banyak tiang bila sinarnya dibagi dengan tepat.',mv:7,o:6,s:[0,1,0],g:['#..L...','..pb...','.#..b.L','.A.T...','..apbT#','T......','...LT#.']},
+{n:'Dua Tiang',t:'Langkah sangat terbatas. Telusuri jalur sinar dari panel sebelum memutar apa pun.',mv:8,o:7,s:[5,7,3],g:['.Lb.a#BT','...TL...','.a....a.','.......#','....#L.T','..B...p#','.#.#.qb.','..T.....']},
+{n:'Sudut Tepat',t:'Debu dan bayangan mengurangi energi panel. Di sini setiap belokan harus tepat.',mv:9,o:8,s:[0,0,0],g:['.p.....L','..T...#.','Ta...p.#','.TTT...#','L#......','aaA..b..','..p....L','.Bb...#.']},
+{n:'Malam Kiarakoneng',t:'Terangi seluruh jalan dusun sebelum malam tiba. Setelah ini papan makin luas dan jauh lebih menantang.',mv:9,o:8,s:[7,0,2],g:['.#b.....','..B.a...','.b.qb.#T','bb.p.L..','..#.....','..#L.#..','L...#.T#','...A..#.']}];
+/* Mekanik matahari > panel > lampu: data papan (g) dan tip (t) di bawah menggantikan versi sebelumnya. Semua level diverifikasi solver. */
+const NG=[
+ ['...LP','.S...','..C..','.....','....b'],
+ ['##....','.S....','C.T...','..b...','.b..P#','.ab.L.'],
+ ['..PL.C','#...PL','.S....','.b..p#','......','#abS..'],
+ ['....PLL','..a.q.P','....q.P','...#.#L','.b..b..','...#.#S','a.....C'],
+ ['#....#.','.......','b..q#..','PL..b.P','......L','S#...C.','AS.ab#.'],
+ ['..ba.S.','C.q...a','TS.....','..b....','.....B.','TC.a.PP','.#.#.LL'],
+ ['#..PL..','..pb...','.#..b.P','.A.C..L','..apbT#','S......','..LPC#.'],
+ ['LPb.a#BS','...CPL..','.a....a.','.....L.#','....#P.S','..B...p#','.#.#.qb.','..C.....'],
+ ['.p.....P','..C...#L','Sa...p.#','LSTC...#','P#......','aaA..b..','..p....P','.Bb...#L'],
+ ['.#b.....','..B.a...','.b.qb.#C','bb.p.PL.','..#.....','..#PL#..','PL..#.S#','...A..#.']];
+const NT=['Matahari memancarkan sinar. Putar cermin agar sinar mengenai panel surya, lalu panel mengalirkan listrik ke lampu di sebelahnya.','Bangunan, pohon, semak, dan awan mendung menghalangi cahaya, seperti bayangan yang menutupi panel. Lampu hanya menyala jika panelnya menerima sinar.','Prisma membagi satu sinar menjadi dua, seperti satu sumber energi yang melayani beberapa panel.','Misi: nyalakan tiga lampu PJU di simpang gelap. Arahkan sinar matahari lewat celah sempit ke tiap panel surya.','Cermin gelap berbaut terpasang permanen dan tidak bisa diputar. Rencanakan jalur sinar dengan memperhitungkannya.','Solar charge controller mengatur aliran listrik dari panel ke baterai dan lampu. Di sini kamu yang menjadi controller.','Satu matahari bisa melayani banyak panel bila sinarnya dibagi dengan tepat.','Langkah sangat terbatas. Telusuri jalur sinar dari matahari sebelum memutar apa pun.','Debu dan bayangan mengurangi energi panel. Di sini setiap belokan harus tepat.','Terangi seluruh jalan dusun sebelum malam tiba. Setelah ini papan makin luas dan jauh lebih menantang.'];
+NG.forEach((g,i)=>{LV[i].g=g;LV[i].t=NT[i]});
+/* Level 11-20: papan lebih luas (8x8 sampai 9x9). Semua diverifikasi solver: ada solusi, solusi optimal unik, o = langkah terbaik, mv = o+1. */
+LV.push(
+{n:"Sawah Terasering",t:"Lahan makin luas dan butuh lebih banyak belokan. Ikuti sinar dari matahari, satu cermin demi satu cermin.",mv:8,o:7,s:[6,7,3],g:['.S......','..##b.a.','..#..L.T','..#TaP..','..b...pT','...CLP..','.C..S...','..a..b..']},
+{n:"Kebun Teh",t:"Awan mendung menutup beberapa petak. Panel hanya menghasilkan listrik bila sinar sampai tanpa terhalang.",mv:8,o:7,s:[0,6,0],g:['..LP..##','....C...','Cb.p.a.T','S.S...#.','.a..a..C','.T.b..T.','....ba.a','#.....LP']},
+{n:"Balai Dusun",t:"Dua prisma membagi sinar ke tiga panel. Atur prisma lebih dulu, baru cermin di tiap cabang.",mv:9,o:8,s:[0,5,0],g:['#TTb..a.','T.S.#...','....P.p.','.#C.LS..','LP.bCS..','...p..b.','b....PL.','..#a.b..']},
+{n:"Jalur Ronda",t:"Dua sinar boleh saling menyilang di petak kosong tanpa saling mengganggu. Yang berubah arah hanya sinar yang menyentuh cermin.",mv:9,o:8,s:[7,3,2],g:['...CC..T','.b.p.a..','#...LP.b','PpPb.b..','L.L...S.','.a...bT#','.....T.S','C#S...#.']},
+{n:"Lapangan Desa",t:"Papan makin lebar. Mulai dari panel yang paling jauh, lalu telusuri mundur sinar yang dibutuhkan.",mv:10,o:9,s:[0,4,0],g:['b.P......','..LSb..aa','a..a.....','.CC.PL#.#','...q.aL..','..T...Pp#','#S.#S....','..TCTb.b.']},
+{n:"Jembatan Bambu",t:"Sinar harus lewat celah sempit di antara pohon dan bangunan. Satu cermin yang salah arah bisa memadamkan seluruh cabang.",mv:10,o:9,s:[8,2,2],g:['PLb.aC..a','...C.S.S#','...L..b..','a.pPbS.#.','...P..q..','T#.L#....','CTa...b..','#.....T..']},
+{n:"Pasar Kiarakoneng",t:"Tiga prisma membuat percabangan bertingkat. Satu matahari melayani empat lampu, seperti satu sumber energi melayani banyak beban.",mv:11,o:10,s:[4,0,1],g:['a....P.aC','.....L..#','..S.p..b.','ST.T..PL.','#b.a.#...','..L.p.b..','L.Pb.##.T','Pp..b....','...C#TS.C']},
+{n:"Tanjakan Gelap",t:"Cermin gelap berbaut tidak bisa diputar. Jadikan posisinya tumpuan, lalu atur cermin lain di sekitarnya.",mv:11,o:10,s:[8,6,2],g:['.LP.aPL#S','#C....#..','Pa...B..B','L......b.','.q..b.b.b','L.C.CT.#.','Pp.a..p..','....#SC.T','Sa.bT.#.T']},
+{n:"Rumah Cahaya",t:"Hampir semua cermin harus diputar. Hitung dulu langkahmu karena hanya ada satu langkah cadangan.",mv:12,o:11,s:[0,2,0],g:['.b...aC.S','LPC....S.','..p..b..L','T...PL#aP','T#p.b.S..','LP...#..#','T.a.p..b.','#.C..S.#C','Ta..b....']},
+{n:"Puncak Kiarakoneng",t:"Ujian terakhir: lima lampu, empat prisma, dan hanya satu langkah cadangan. Terangi seluruh dusun!",mv:13,o:12,s:[3,8,3],g:['..#CTSCST','.ST..C###','A..q...a.','..TPL....','...b.aC.#','a.a...L.#','PL..PqPp.','....L...L','a.b.Sa.qP']});
+const FACTS=['Panel surya mengubah cahaya matahari menjadi listrik arus searah yang disimpan di baterai.','Sensor cahaya menyalakan lampu PJU otomatis saat gelap dan mematikannya saat pagi.','Debu dan bayangan pohon mengurangi listrik yang dihasilkan panel, jadi panel perlu dibersihkan berkala.','Lampu LED sangat hemat energi, cocok untuk PJU tenaga surya.','Dusun yang jauh dari jaringan listrik sangat terbantu PJU surya karena tanpa kabel panjang.'];
+let W,H,DPR,C=48,bx=0,by=0,N=5,M=5,cells=null,SRC=[0,0,0],li=0,left=0,used=0,done=false,lit=new Set(),pieces={},glow={},rot={},LAMPS=0,parts=[],toastT=0,hov=-1,PR=[];
+try{PR=JSON.parse(localStorage.getItem('sts_grid3')||'[]')}catch(e){}
+const ANG={a:-Math.PI/4,A:-Math.PI/4,p:-Math.PI/4,b:Math.PI/4,B:Math.PI/4,q:Math.PI/4};
+function rs(){DPR=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR}
+addEventListener('resize',rs);
+function layout(){const top=86,bot=96;C=Math.floor(Math.max(24,Math.min((W-28)/M,(H-top-bot)/N,78)));bx=(W-M*C)/2;by=top+(H-top-bot-N*C)/2}
+const px=x=>bx+(x+.5)*C,py=y=>by+(y+.5)*C;
+function rr(x,y,w,h,r,c){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();ctx.fillStyle=c;ctx.fill()}
+const circ=(x,y,r,c)=>{ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fillStyle=c;ctx.fill()};
+const line=(a,b,c,d)=>{ctx.beginPath();ctx.moveTo(a,b);ctx.lineTo(c,d);ctx.stroke()};
+function trace(){
+  lit=new Set();pieces={};const q=[{x:SRC[0],y:SRC[1],d:SRC[2]}],seen=new Set();
+  const add=(x,y,a,b,c,d)=>{(pieces[y*M+x]=pieces[y*M+x]||[]).push([a,b,c,d])};
+  while(q.length){
+    let r=q.pop();
+    for(let k=0;k<300;k++){
+      const key=r.x+','+r.y+','+r.d;if(seen.has(key))break;seen.add(key);
+      const nx=r.x+DX[r.d],ny=r.y+DY[r.d],mx=(r.x+nx)/2,my=(r.y+ny)/2;
+      add(r.x,r.y,r.x,r.y,mx,my);
+      if(nx<0||ny<0||nx>=M||ny>=N||(nx===SRC[0]&&ny===SRC[1]))break;
+      const c=cells[ny][nx];if(c==='#'||c==='T'||c==='L'||c==='S'||c==='C')break;
+      add(nx,ny,mx,my,nx,ny);
+      if(c==='P'){lit.add(ny*M+nx);break}
+      r={x:nx,y:ny,d:r.d};
+      if(c==='a'||c==='A')r.d=MS[r.d];else if(c==='b'||c==='B')r.d=MB[r.d];
+      else if(c==='p'||c==='q')q.push({x:nx,y:ny,d:(c==='p'?MS:MB)[r.d]});
+    }
+  }
+}
+function startLevel(i){
+  li=i;const L=LV[i];cells=L.g.map(r=>r.split(''));N=cells.length;M=cells[0].length;SRC=L.s;
+  left=L.mv;used=0;done=false;glow={};rot={};parts=[];LAMPS=L.g.join('').split('L').length-1;
+  cells.forEach((r,y)=>r.forEach((c,x)=>{if(ANG[c]!==undefined)rot[y*M+x]=ANG[c]}));
+  trace();hudUpd();hud.classList.remove('hide');leg.classList.remove('hide');ov.classList.add('hide');
+  toast.innerHTML=`<b>Level ${i+1}, ${L.n}</b>${L.t}`;toast.classList.remove('hide');clearTimeout(toastT);toastT=setTimeout(()=>toast.classList.add('hide'),7000);
+}
+function hudUpd(){const L=LV[li];$('ttl').textContent=`Level ${li+1}, ${L.n}`;$('mv').textContent=`Langkah ${'\u25CF'.repeat(left)}${'\u25CB'.repeat(L.mv-left)}, lampu ${lit.size}/${LAMPS}`}
+function menu(){
+  cells=null;N=M=5;hud.classList.add('hide');leg.classList.add('hide');toast.classList.add('hide');
+  const b=LV.map((L,i)=>{const ok=i===0||PR[i-1]>0,s=PR[i]||0;return `<button data-i="${i}" ${ok?'':'disabled'}><b>${ok?i+1:'\u{1F512}'}</b><small>${ok?'\u2605'.repeat(s)+'\u2606'.repeat(3-s):'&nbsp;'}</small></button>`}).join('');
+  card.innerHTML=`<h1>Kiara Beam</h1><p class="sub">Terangi Dusun Kiarakoneng 1</p><div class="how"><span>Sinar keluar dari panel surya mengikuti panah.</span><span>Ketuk cermin atau prisma untuk memutarnya.</span><span>Prisma membagi sinar menjadi dua cabang.</span><span>Nyalakan semua lampu dalam batas langkah.</span></div><div class="lvg">${b}</div>`;
+  card.querySelectorAll('[data-i]').forEach(e=>e.onclick=()=>startLevel(+e.dataset.i));
+  ov.style.alignItems='center';ov.classList.remove('hide');
+}
+function spark(x,y,n,col){for(let k=0;k<n;k++){const a=Math.random()*6.28,v=60+Math.random()*140;parts.push({x:px(x),y:py(y),vx:Math.cos(a)*v,vy:Math.sin(a)*v-50,l:.8,m:.8,c:col})}}
+const FL={a:'b',b:'a',p:'q',q:'p'};
+function tapCell(x,y){
+  const c=cells[y][x];if(!FL[c]||done||left<=0)return;
+  cells[y][x]=FL[c];left--;used++;trace();spark(x,y,8,'255,240,170');hudUpd();
+  if(poweredCount()===LAMPS){done=true;win()}else if(left<=0){done=true;setTimeout(lose,700)}
+}
+function win(){
+  const o=LV[li].o,st=used<=o?3:used<=o+1?2:1;PR[li]=Math.max(PR[li]||0,st);
+  try{localStorage.setItem('sts_grid3',JSON.stringify(PR))}catch(e){}
+  cells.forEach((r,y)=>r.forEach((c,x)=>{if(c==='L')spark(x,y,28,'255,226,110')}));
+  setTimeout(()=>{
+    card.innerHTML=`<div class="rec">Level selesai</div><h1>Lampu menyala!</h1><div class="big">${'\u2605'.repeat(st)}${'\u2606'.repeat(3-st)}</div><p>${used} langkah, terbaik ${o}</p><div class="edu"><b>Tahukah kamu?</b>${FACTS[Math.random()*FACTS.length|0]}</div><div class="row"><button id="nx">${li<LV.length-1?'Level berikutnya':'Menu'}</button><button id="rp" class="alt">Ulangi</button></div>`;
+    ov.style.alignItems='flex-end';ov.classList.remove('hide');
+    $('nx').onclick=()=>li<LV.length-1?startLevel(li+1):menu();$('rp').onclick=()=>startLevel(li);
+  },1100);
+}
+function lose(){
+  card.innerHTML=`<h1>Langkah habis</h1><p>Lampu belum menyala semua. Coba susunan lain!</p><div class="row"><button id="rp">Main lagi</button><button id="mn" class="alt">Menu</button></div>`;
+  ov.style.alignItems='flex-end';ov.classList.remove('hide');$('rp').onclick=()=>startLevel(li);$('mn').onclick=menu;
+}
+const cellAt=e=>{if(!cells)return null;const x=Math.floor((e.clientX-bx)/C),y=Math.floor((e.clientY-by)/C);return x>=0&&y>=0&&x<M&&y<N?[x,y]:null};
+cv.addEventListener('pointerdown',e=>{if(done||!ov.classList.contains('hide'))return;const c=cellAt(e);if(c)tapCell(c[0],c[1])});
+cv.addEventListener('pointermove',e=>{const c=cellAt(e);hov=c&&cells&&FL[cells[c[1]][c[0]]]?c[1]*M+c[0]:-1});
+$('rst').onclick=()=>startLevel(li);$('mnb').onclick=menu;
+/* ---------- gambar ---------- */
+function drawBeams(t){
+  ctx.save();ctx.lineCap='round';
+  for(const k in pieces)pieces[k].forEach(p=>{
+    const a=px(p[0]),b=py(p[1]),c=px(p[2]),d=py(p[3]);
+    ctx.globalCompositeOperation='lighter';ctx.strokeStyle='rgba(255,205,70,.32)';ctx.lineWidth=C*.28;line(a,b,c,d);
+    ctx.globalCompositeOperation='source-over';ctx.strokeStyle='rgba(255,247,196,.97)';ctx.lineWidth=C*.09;line(a,b,c,d);
+    ctx.setLineDash([C*.1,C*.3]);ctx.lineDashOffset=-t*C*1.4;ctx.strokeStyle='rgba(255,130,20,.95)';ctx.lineWidth=C*.045;line(a,b,c,d);ctx.setLineDash([]);
+  });
+  ctx.restore();
+}
+function house(x,y){const X=bx+x*C+C*.1,Y=by+y*C+C*.1,w=C*.8;
+  rr(X,Y+C*.34,w,C*.52,4,'hsl(40,45%,84%)');rr(X+w*.38,Y+C*.5,w*.24,C*.3,2,'hsl(48,92%,62%)');
+  rr(X-C*.04,Y,w+C*.08,C*.46,5,'hsl(12,60%,50%)');rr(X+w*.08,Y+C*.06,w*.84,C*.1,3,'hsl(12,60%,62%)');rr(X-C*.04,Y+C*.36,w+C*.08,C*.1,3,'hsl(10,55%,38%)')}
+function tree(x,y){const cx=px(x),Y=by+y*C;
+  rr(cx-C*.06,Y+C*.62,C*.12,C*.3,2,'hsl(28,40%,35%)');rr(cx-C*.34,Y+C*.4,C*.68,C*.34,6,'hsl(125,40%,32%)');
+  rr(cx-C*.26,Y+C*.22,C*.52,C*.3,6,'hsl(110,45%,44%)');rr(cx-C*.17,Y+C*.07,C*.34,C*.26,6,'hsl(95,50%,58%)')}
+function lamp(x,y){const g=glow[y*M+x]||0,cx=px(x),cy=py(y),r=C*.3;
+  circ(cx+2,cy+4,r+2,'rgba(0,0,0,.2)');circ(cx,cy,r+3,'hsl(215,12%,34%)');circ(cx,cy,r,'hsl(215,10%,70%)');
+  ctx.save();ctx.globalAlpha=g;circ(cx,cy,r,'hsl(50,95%,62%)');ctx.restore();
+  circ(cx,cy,r*.45,g>.5?'#fffbe0':'hsl(215,10%,82%)');
+  if(g>.02){ctx.save();ctx.globalCompositeOperation='lighter';const rg=ctx.createRadialGradient(cx,cy,0,cx,cy,C*1.1*g+1);rg.addColorStop(0,`rgba(255,236,150,${.85*g})`);rg.addColorStop(1,'rgba(255,220,100,0)');ctx.fillStyle=rg;ctx.fillRect(cx-C*1.3,cy-C*1.3,C*2.6,C*2.6);ctx.restore()}}
+function source(x,y,d){const cx=px(x),cy=py(y),s=C*.84,X=cx-s/2,Y=cy-s/2;
+  rr(X,Y,s,s,6,'hsl(210,12%,78%)');rr(X+3,Y+3,s-6,s-6,4,'hsl(222,66%,30%)');
+  ctx.strokeStyle='rgba(190,215,255,.45)';ctx.lineWidth=1;for(let k=1;k<3;k++){line(X+3+(s-6)*k/3,Y+3,X+3+(s-6)*k/3,Y+s-3);line(X+3,Y+3+(s-6)*k/3,X+s-3,Y+3+(s-6)*k/3)}
+  circ(cx,cy,C*.15,'hsl(48,96%,60%)');ctx.strokeStyle='hsl(48,96%,60%)';ctx.lineWidth=2;
+  for(let k=0;k<8;k++){const a=k*Math.PI/4;line(cx+Math.cos(a)*C*.2,cy+Math.sin(a)*C*.2,cx+Math.cos(a)*C*.28,cy+Math.sin(a)*C*.28)}
+  const dx=DX[d],dy=DY[d],ex=cx+dx*C*.4,ey=cy+dy*C*.4;ctx.beginPath();ctx.moveTo(ex+dx*C*.1,ey+dy*C*.1);ctx.lineTo(ex-dx*C*.06-dy*C*.13,ey-dy*C*.06+dx*C*.13);ctx.lineTo(ex-dx*C*.06+dy*C*.13,ey-dy*C*.06-dx*C*.13);ctx.closePath();ctx.fillStyle='#ffd84a';ctx.fill();ctx.strokeStyle='#7a5a00';ctx.lineWidth=1.5;ctx.stroke()}
+function mirror(x,y,c,t){const k=y*M+x,fixed=c==='A'||c==='B',sp=c==='p'||c==='q',cx=px(x),cy=py(y),L=C*.43;
+  if(!fixed){ctx.save();ctx.strokeStyle=sp?'rgba(255,190,60,.95)':'rgba(255,255,255,.9)';ctx.lineWidth=2;ctx.setLineDash([4,4]);if(hov===k){ctx.lineWidth=3.5;ctx.setLineDash([])}
+    ctx.beginPath();ctx.arc(cx,cy,C*.46,0,7);ctx.stroke();ctx.restore();circ(cx,cy,C*.46,'rgba(255,255,255,.12)')}
+  ctx.save();ctx.translate(cx,cy);ctx.rotate(rot[k]||0);ctx.lineCap='round';
+  ctx.strokeStyle='rgba(0,0,0,.28)';ctx.lineWidth=C*.17;line(-L,C*.04,L,C*.04);
+  const g=ctx.createLinearGradient(0,-C*.08,0,C*.08);
+  if(fixed){g.addColorStop(0,'#8a96a3');g.addColorStop(1,'#46515c')}else if(sp){g.addColorStop(0,'#ffe3a0');g.addColorStop(1,'#e59a3a')}else{g.addColorStop(0,'#eef6ff');g.addColorStop(1,'#6fa5de')}
+  ctx.strokeStyle=g;ctx.lineWidth=C*.16;line(-L,0,L,0);ctx.strokeStyle='rgba(255,255,255,.8)';ctx.lineWidth=C*.035;line(-L*.9,-C*.04,L*.9,-C*.04);
+  if(fixed){circ(-L*.7,0,C*.035,'#222');circ(L*.7,0,C*.035,'#222')}
+  ctx.restore();circ(cx,cy,C*.06,sp?'#7a4a00':'#2a3a4a');
+  if(sp){ctx.save();ctx.translate(cx,cy);ctx.rotate(Math.PI/4);ctx.fillStyle='#fff8d0';ctx.fillRect(-C*.07,-C*.07,C*.14,C*.14);ctx.restore()}}
+const NB4=[[1,0],[-1,0],[0,1],[0,-1]];
+function lampOn(x,y){return NB4.some(d=>{const a=x+d[0],b=y+d[1];return a>=0&&b>=0&&a<M&&b<N&&lit.has(b*M+a)})}
+function poweredCount(){let n=0;cells.forEach((r,y)=>r.forEach((c,x)=>{if(c==='L'&&lampOn(x,y))n++}));return n}
+function panCount(){return cells.flat().filter(c=>c==='P').length}
+function hudUpd(){const L=LV[li];$('ttl').textContent=`Level ${li+1}, ${L.n}`;$('mv').innerHTML=`Langkah ${'●'.repeat(left)}${'○'.repeat(L.mv-left)}<br>Panel ${lit.size}/${panCount()}, lampu ${poweredCount()}/${LAMPS}`}
+function menu(){
+  cells=null;N=M=5;hud.classList.add('hide');leg.classList.add('hide');toast.classList.add('hide');
+  const b=LV.map((L,i)=>{const ok=i===0||PR[i-1]>0,s=PR[i]||0;return `<button data-i="${i}" ${ok?'':'disabled'}><b>${ok?i+1:'\u{1F512}'}</b><small>${ok?'\u2605'.repeat(s)+'\u2606'.repeat(3-s):'&nbsp;'}</small></button>`}).join('');
+  card.innerHTML=`<h1>Kiara Beam</h1><p class="sub">Terangi Dusun Kiarakoneng 1</p><div class="how"><span>Matahari memancarkan sinar mengikuti panah.</span><span>Ketuk cermin atau prisma untuk memutarnya.</span><span>Arahkan sinar ke panel surya.</span><span>Panel yang kena sinar menyalakan lampu di sebelahnya.</span><span>Bangunan, pohon, semak, dan awan mendung menghalangi sinar.</span></div><div class="lvg">${b}</div>`;
+  card.querySelectorAll('[data-i]').forEach(e=>e.onclick=()=>startLevel(+e.dataset.i));
+  ov.style.alignItems='center';ov.classList.remove('hide');
+}
+function source(x,y,d){
+  const cx=px(x),cy=py(y),t=performance.now()/1000;
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  const hg=ctx.createRadialGradient(cx,cy,0,cx,cy,C*.9);hg.addColorStop(0,'rgba(255,200,60,.55)');hg.addColorStop(1,'rgba(255,200,60,0)');
+  ctx.fillStyle=hg;ctx.fillRect(cx-C,cy-C,C*2,C*2);ctx.restore();
+  ctx.save();ctx.strokeStyle='hsl(42,96%,56%)';ctx.lineWidth=C*.06;ctx.lineCap='round';
+  for(let k=0;k<12;k++){const a=k*Math.PI/6+t*.4;line(cx+Math.cos(a)*C*.32,cy+Math.sin(a)*C*.32,cx+Math.cos(a)*C*.44,cy+Math.sin(a)*C*.44)}
+  ctx.restore();
+  circ(cx,cy,C*.27,'hsl(36,96%,48%)');circ(cx,cy,C*.23,'hsl(48,98%,60%)');circ(cx-C*.06,cy-C*.06,C*.08,'rgba(255,255,255,.65)');
+  const dx=DX[d],dy=DY[d],ex=cx+dx*C*.44,ey=cy+dy*C*.44;
+  ctx.beginPath();ctx.moveTo(ex+dx*C*.12,ey+dy*C*.12);ctx.lineTo(ex-dx*C*.04-dy*C*.12,ey-dy*C*.04+dx*C*.12);ctx.lineTo(ex-dx*C*.04+dy*C*.12,ey-dy*C*.04-dx*C*.12);ctx.closePath();
+  ctx.fillStyle='#fff3a0';ctx.fill();ctx.strokeStyle='#a56a00';ctx.lineWidth=1.5;ctx.stroke();
+}
+function panel(x,y,t){
+  const k=y*M+x,g=glow[k]||0,cx=px(x),cy=py(y),s=C*.84,X=cx-s/2,Y=cy-s/2;
+  rr(X,Y+3,s,s,6,'rgba(0,0,0,.2)');rr(X,Y,s,s,6,'hsl(210,12%,78%)');rr(X+3,Y+3,s-6,s-6,4,'hsl(222,66%,30%)');
+  if(g>.02){ctx.save();ctx.globalAlpha=g;rr(X+3,Y+3,s-6,s-6,4,'hsl(198,85%,50%)');ctx.restore()}
+  ctx.strokeStyle='rgba(190,215,255,.5)';ctx.lineWidth=1;
+  for(let i=1;i<3;i++){line(X+3+(s-6)*i/3,Y+3,X+3+(s-6)*i/3,Y+s-3);line(X+3,Y+3+(s-6)*i/3,X+s-3,Y+3+(s-6)*i/3)}
+  ctx.beginPath();[[.06,-.3],[-.14,.04],[-.01,.04],[-.06,.3],[.15,-.05],[.01,-.05]].forEach((p,i)=>i?ctx.lineTo(cx+p[0]*C,cy+p[1]*C):ctx.moveTo(cx+p[0]*C,cy+p[1]*C));ctx.closePath();
+  ctx.fillStyle=`rgba(255,228,94,${.28+.72*g})`;ctx.fill();
+  if(g>.02){ctx.save();ctx.globalCompositeOperation='lighter';const rg=ctx.createRadialGradient(cx,cy,0,cx,cy,C*.8);rg.addColorStop(0,`rgba(120,220,255,${.5*g})`);rg.addColorStop(1,'rgba(120,220,255,0)');ctx.fillStyle=rg;ctx.fillRect(cx-C,cy-C,C*2,C*2);ctx.restore()}
+  NB4.forEach(d=>{const nx=x+d[0],ny=y+d[1];if(nx<0||ny<0||nx>=M||ny>=N||cells[ny][nx]!=='L')return;
+    const a=[cx+d[0]*C*.42,cy+d[1]*C*.42],b=[px(nx)-d[0]*C*.33,py(ny)-d[1]*C*.33];
+    ctx.save();ctx.lineCap='round';ctx.strokeStyle='#39424b';ctx.lineWidth=C*.12;line(a[0],a[1],b[0],b[1]);
+    if(g>.3){ctx.strokeStyle='rgba(255,226,90,.95)';ctx.lineWidth=C*.06;ctx.setLineDash([C*.08,C*.14]);ctx.lineDashOffset=-t*C*1.2;line(a[0],a[1],b[0],b[1]);ctx.setLineDash([])}
+    ctx.restore()});
+}
+function menu(){
+  cells=null;N=M=5;hud.classList.add('hide');leg.classList.add('hide');toast.classList.add('hide');
+  const b=LV.map((L,i)=>{const s=PR[i]||0;return `<button data-i="${i}"><b>${i+1}</b><small>${'\u2605'.repeat(s)+'\u2606'.repeat(3-s)}</small></button>`}).join('');
+  card.innerHTML=`<h1>Kiara Beam</h1><p class="sub">Terangi Dusun Kiarakoneng 1</p><div class="how"><span>Matahari memancarkan sinar mengikuti panah.</span><span>Ketuk cermin atau prisma untuk memutarnya.</span><span>Arahkan sinar ke panel surya.</span><span>Panel yang kena sinar menyalakan lampu di sebelahnya.</span><span>Bangunan, pohon, semak, dan awan mendung menghalangi sinar.</span></div><div class="lvg">${b}</div>`;
+  card.querySelectorAll('[data-i]').forEach(e=>e.onclick=()=>startLevel(+e.dataset.i));
+  ov.style.alignItems='center';ov.classList.remove('hide');
+}
+let _lh=-1;
+function layout(){
+  const hb=hud.classList.contains('hide')?0:hud.getBoundingClientRect().bottom;
+  const lh=leg.classList.contains('hide')?0:leg.offsetHeight;
+  if(lh!==_lh){_lh=lh;document.documentElement.style.setProperty('--lh',lh+'px')}
+  const top=hb+10,bot=lh+(lh?20:10)+10,aw=W-32,ah=H-top-bot;
+  C=Math.floor(Math.max(22,Math.min(aw/M,ah/N,84)));
+  bx=(W-M*C)/2;by=top+(ah-N*C)/2;
+}
+toast.onclick=()=>toast.classList.add('hide');
+function bush(x,y){
+  const cx=px(x),cy=py(y);
+  ctx.save();ctx.fillStyle='rgba(0,0,0,.2)';ctx.beginPath();ctx.ellipse(cx+2,cy+C*.3,C*.38,C*.12,0,0,7);ctx.fill();ctx.restore();
+  circ(cx-C*.19,cy+C*.1,C*.23,'hsl(130,45%,28%)');circ(cx+C*.19,cy+C*.1,C*.23,'hsl(130,45%,28%)');
+  circ(cx,cy-C*.05,C*.27,'hsl(120,45%,37%)');circ(cx-C*.1,cy-C*.12,C*.12,'hsl(105,55%,52%)');circ(cx+C*.14,cy-C*.02,C*.09,'hsl(110,50%,48%)');
+  [[-.2,.12],[.08,-.1],[.21,.13],[-.05,.18]].forEach(p=>circ(cx+p[0]*C,cy+p[1]*C,C*.04,'hsl(5,78%,54%)'));
+}
+function cloud(x,y,t){
+  const cx=px(x),cy=py(y),b=Math.sin(t*1.6+x*1.7+y)*C*.03;
+  ctx.save();ctx.fillStyle='rgba(0,0,0,.22)';ctx.beginPath();ctx.ellipse(cx,cy+C*.34,C*.36,C*.1,0,0,7);ctx.fill();ctx.restore();
+  ctx.save();ctx.strokeStyle='rgba(165,205,240,.9)';ctx.lineWidth=Math.max(1.5,C*.03);ctx.lineCap='round';
+  for(let i=0;i<3;i++){const rx=cx-C*.2+i*C*.2,f=((t*1.1+i*.37)%1);line(rx,cy+C*.14+f*C*.22,rx-C*.02,cy+C*.2+f*C*.22)}
+  ctx.restore();
+  ctx.save();ctx.translate(0,b-C*.08);
+  const D='hsl(222,12%,36%)',Mid='hsl(222,12%,46%)',Hi='hsl(222,12%,56%)';
+  circ(cx-C*.24,cy+C*.06,C*.2,D);circ(cx+C*.24,cy+C*.06,C*.2,D);rr(cx-C*.4,cy+C*.04,C*.8,C*.22,C*.11,D);
+  circ(cx-C*.1,cy-C*.02,C*.24,Mid);circ(cx+C*.14,cy-C*.04,C*.2,Mid);circ(cx-C*.06,cy-C*.1,C*.13,Hi);
+  ctx.restore();
+}
+function draw(t){
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgb(60,155,160)');g.addColorStop(1,'rgb(170,225,180)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  for(let k=0;k<4;k++){const s=.7+.18*(k%3),ox=((t*(6+k*3)+k*W*.37)%(W+300))-150,oy=H*(.1+k*.15);rr(ox,oy,100*s,28*s,14*s,'rgba(255,255,255,.7)');rr(ox+22*s,oy-12*s,56*s,26*s,13*s,'rgba(255,255,255,.7)')}
+  if(!cells)return;
+  layout();const bw=M*C,bh=N*C;
+  rr(bx-12,by-8,bw+24,bh+34,18,'hsl(25,35%,36%)');rr(bx-12,by-12,bw+24,bh+24,18,'hsl(100,42%,46%)');
+  for(let y=0;y<N;y++)for(let x=0;x<M;x++){ctx.fillStyle=(x+y)%2?'hsl(100,42%,50%)':'hsl(100,42%,55%)';ctx.fillRect(bx+x*C,by+y*C,C,C)}
+  ctx.strokeStyle='rgba(0,50,20,.12)';ctx.lineWidth=1;for(let i=0;i<=M;i++)line(bx+i*C,by,bx+i*C,by+bh);for(let i=0;i<=N;i++)line(bx,by+i*C,bx+bw,by+i*C);
+  drawBeams(t);
+  for(let y=0;y<N;y++)for(let x=0;x<M;x++){const c=cells[y][x];
+    if(c==='#')house(x,y);else if(c==='T')tree(x,y);else if(c==='S')bush(x,y);else if(c==='C')cloud(x,y,t);else if(c==='L')lamp(x,y);else if(c==='P')panel(x,y,t);else if(c!=='.')mirror(x,y,c,t);
+    if(x===SRC[0]&&y===SRC[1])source(x,y,SRC[2])}
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  parts.forEach(p=>{const a=Math.max(0,p.l/p.m);ctx.fillStyle=`rgba(${p.c},${a})`;ctx.beginPath();ctx.arc(p.x,p.y,3*(.4+.6*a)+1,0,7);ctx.fill()});ctx.restore();
+}
+let last=0;
+function frame(ts){
+  const dt=Math.min((ts-last)/1000||0,.05);last=ts;
+  if(cells){for(let y=0;y<N;y++)for(let x=0;x<M;x++){const c=cells[y][x],k=y*M+x;
+    if(c==='L'||c==='P'){const t=(c==='L'?lampOn(x,y):lit.has(k))?1:0;glow[k]=(glow[k]||0)+(t-(glow[k]||0))*Math.min(1,dt*6)}
+    else if(ANG[c]!==undefined)rot[k]=(rot[k]||0)+(ANG[c]-(rot[k]||0))*Math.min(1,dt*14)}}
+  parts.forEach(p=>{p.l-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=300*dt});parts=parts.filter(p=>p.l>0);
+  requestAnimationFrame(frame);draw(ts/1000);
+}
+rs();menu();requestAnimationFrame(frame);
+</script>
+<button id="bkx" aria-label="Kembali ke pilihan game">‹</button>
+<script>(function(){var b=document.getElementById("bkx");b.addEventListener("pointerdown",function(e){e.stopPropagation()});b.addEventListener("click",function(){parent.postMessage("sa-back","*")})})();</script>
+</body>
+</html>

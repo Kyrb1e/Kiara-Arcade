@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="id" data-game="tilt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><title>Kiara Tilt</title><style>
+html,body{height:100%;margin:0;overflow:hidden;background:#2f5d50;touch-action:manipulation;user-select:none;-webkit-user-select:none;font-family:"Arial Rounded MT Bold","Trebuchet MS",sans-serif}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+#bkx{position:fixed;z-index:50;top:calc(env(safe-area-inset-top,0px) + 10px);right:10px;width:42px;height:42px;padding:0;border:0;border-radius:12px;background:rgba(0,0,0,.22);color:#fff;font:700 26px/1 "Trebuchet MS",sans-serif;cursor:pointer}
+#bkx:focus-visible{outline:3px solid #fff;outline-offset:2px}
+</style><script src="../js/teks.js?v=202611261444"></script>
+<script src="../js/kontrol.js?v=202611261444"></script>
+<link rel="stylesheet" href="../css/fonts.css?v=202611261444">
+<link rel="stylesheet" href="../css/game.css?v=202611261444">
+<script>try{document.fonts.load('700 16px Fredoka');document.fonts.load('16px "Lilita One"')}catch(e){}</script>
+</head><body><canvas id="c" aria-label="Game Kiara Tilt: ketuk untuk mengunci sudut panel"></canvas>
+<button id="bkx" aria-label="Kembali ke pilihan game">&#8249;</button>
+<script>
+const cv=document.getElementById('c'),x=cv.getContext('2d'),RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let W,H,D;function rs(){D=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*D;cv.height=H*D}addEventListener('resize',rs);rs();
+const LAT=-6.9*Math.PI/180,R2=Math.PI/180,MON=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'],BG=['#ff7a3d','#3b5bdb','#7a3fe0','#169e9a','#e4508f','#2f8fe8','#4a2fd1','#f08a00'];
+const dec=d=>23.44*Math.sin(2*Math.PI*(284+d)/365)*R2,MD=[31,28,31,30,31,30,31,31,30,31,30,31];
+function sun(d,t){const h=(t-12)*15*R2;return{n:Math.sin(d)*Math.cos(LAT)-Math.cos(d)*Math.sin(LAT)*Math.cos(h),u:Math.sin(LAT)*Math.sin(d)+Math.cos(LAT)*Math.cos(d)*Math.cos(h)}}
+const G=s=>s.u>0?900*Math.pow(s.u,.2):0,inc=(s,b)=>Math.max(0,s.n*Math.sin(b)+s.u*Math.cos(b));
+function day(d,b){let e=0;for(let t=6;t<18;t+=.1){const s=sun(d,t);if(s.u>0)e+=G(s)*inc(s,b)*.1}return e}
+function best(d){let o=-60,m=0;for(let b=-60;b<=60;b++){const e=day(d,b*R2);if(e>m){m=e;o=b}}return[o,m]}
+let SV={best:0};try{Object.assign(SV,JSON.parse(localStorage.getItem('stl_v1')||'{}'))}catch(e){}
+let st='ready',score=0,mi=5,ban=0,ds='',bgi=1,beta=0,dir=1,t=6,E=0,Eo=1,Ob=0,pct=0,D0=0,msg='',lastT=0,pop=0,ok=false;
+function round(){let m;do{m=Math.random()*12|0}while(m===mi&&score>0);mi=m;const dm=1+(Math.random()*MD[m]|0);ds=dm+' '+MON[m];D0=dec(MD.slice(0,m).reduce((a,b)=>a+b,0)+dm);ban=2;[Ob,Eo]=best(D0);bgi=(bgi+1)%BG.length;beta=(Math.random()*80-40);dir=Math.random()<.5?-1:1;st='aim'}
+function lock(){st='run';t=6;E=0}
+function finish(){pct=Math.min(100,E/Eo*100);ok=pct>=90;const d=D0/R2,yo=Math.abs(Ob)<1?'hampir datar':Math.abs(Ob)+'\u00B0 ke '+(Ob>0?'utara':'selatan'),yk=Math.abs(Math.round(beta))<1?'datar':Math.abs(Math.round(beta))+'\u00B0 ke '+(beta>0?'utara':'selatan');
+msg=[`Optimum ${yo}. Kamu ${yk}.`,d>8?'Matahari bergeser ke utara bulan ini.':d<-8?'Matahari bergeser ke selatan bulan ini.':'Matahari hampir di atas kepala, panel hampir datar paling efektif.'];
+if(ok){score++;pop=1;if(score>SV.best){SV.best=score;try{localStorage.setItem('stl_v1',JSON.stringify(SV))}catch(e){}}}st='result'}
+function tap(){if(st==='ready'){score=0;round()}else if(st==='aim'&&ban<=0)lock();else if(st==='result'){if(ok)round();else{score=0;round()}}}
+cv.addEventListener('pointerdown',tap);addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();tap()}});
+document.getElementById('bkx').addEventListener('pointerdown',e=>e.stopPropagation());document.getElementById('bkx').addEventListener('click',()=>parent.postMessage('sa-back','*'));
+const F=(s,w)=>x.font=`700 ${s}px Fredoka,"Segoe UI",sans-serif`;
+function T(s,px,py,sz,a,al){x.globalAlpha=a==null?1:a;F(sz);x.textAlign=al||'center';x.textBaseline='middle';x.fillStyle='#fff';x.fillText(s,px,py);x.globalAlpha=1}
+function draw(){x.setTransform(D,0,0,D,0,0);const gy=H*.74,cx=W/2,py=gy-H*.1,R=Math.min(W*.44,H*.44),L=Math.min(W*.3,130);
+x.fillStyle=BG[bgi];x.fillRect(0,0,W,H);x.fillStyle='rgba(0,0,0,.18)';x.fillRect(0,gy,W,H-gy);
+if(st!=='ready'){x.strokeStyle='rgba(255,255,255,.28)';x.lineWidth=3;x.setLineDash([2,10]);x.lineCap='round';x.beginPath();for(let h=6;h<=18;h+=.25){const s=sun(D0,h);if(s.u<0)continue;const X=cx-s.n*R,Y=py-s.u*R;h<=6.01?x.moveTo(X,Y):x.lineTo(X,Y)}x.stroke();x.setLineDash([])}
+const b=beta*R2;x.fillStyle='#fff';x.fillRect(cx-5,py,10,gy-py);
+let sn=null;if(st==='run'||st==='result'){sn=sun(D0,Math.min(t,18));
+if(sn.u>0){const sx=cx-sn.n*R,sy=py-sn.u*R,k=inc(sn,b);x.strokeStyle=`rgba(255,224,138,${.15+.85*k})`;x.lineWidth=4+8*k;x.lineCap='round';x.beginPath();x.moveTo(sx,sy);x.lineTo(cx,py);x.stroke();x.fillStyle='#ffe08a';x.beginPath();x.arc(sx,sy,Math.max(14,W*.035),0,7);x.fill()}}
+else if(st==='aim'){const s=sun(D0,12);x.fillStyle='rgba(255,224,138,.45)';x.beginPath();x.arc(cx-s.n*R,py-s.u*R,Math.max(14,W*.035),0,7);x.fill()}
+x.save();x.translate(cx,py);x.rotate(-b);x.lineCap='round';x.strokeStyle='#fff';x.lineWidth=16;x.beginPath();x.moveTo(-L/2,0);x.lineTo(L/2,0);x.stroke();x.strokeStyle='#2b3242';x.lineWidth=8;x.beginPath();x.moveTo(-L/2+4,-1);x.lineTo(L/2-4,-1);x.stroke();x.restore();
+x.fillStyle='#fff';x.beginPath();x.arc(cx,py,9,0,7);x.fill();
+T('U',14,gy+16,16,.7,'left');T('S',W-14,gy+16,16,.7,'right');
+if(st==='aim'&&ban>0){const a=Math.min(1,ban*1.5);x.fillStyle='rgba(0,0,0,'+.22*a+')';x.fillRect(0,H*.27,W,H*.22);T(ds,cx,H*.34,Math.min(W*.16,72),a);T('Deklinasi matahari '+(D0/R2>0?'+':'')+(D0/R2).toFixed(1).replace('.',',')+'\u00B0',cx,H*.43,Math.min(W*.045,18),a*.9)}
+const sc=Math.min(W*.24,120)*(1+pop*.25);T(String(score),cx,H*.14,sc);pop=Math.max(0,pop-.05);T(st!=='ready'?ds:'',cx,H*.14+sc*.62,Math.min(W*.06,26),.9);
+if(st==='ready'){T('KIARA TILT',cx,H*.3,Math.min(W*.12,54));T('Kunci sudut panel, tangkap matahari.',cx,H*.37,Math.min(W*.04,16),.9);T('Ketuk untuk main',cx,gy+(H-gy)*.5,Math.min(W*.07,28));T('Rekor '+SV.best,cx,gy+(H-gy)*.78,Math.min(W*.045,18),.85)}
+else if(st==='aim'){T(Math.abs(Math.round(beta))+'\u00B0 '+(Math.round(beta)===0?'':beta>0?'utara':'selatan'),cx,gy+(H-gy)*.34,Math.min(W*.1,44));T(ban>0?'Perhatikan tanggalnya':'Ketuk untuk mengunci',cx,gy+(H-gy)*.7,Math.min(W*.045,18),.9)}
+else if(st==='run'){x.fillStyle='rgba(255,255,255,.3)';x.fillRect(W*.15,gy+(H-gy)*.5,W*.7,14);x.fillStyle='#fff';x.fillRect(W*.15,gy+(H-gy)*.5,W*.7*Math.min(1,E/Eo),14);T(Math.round(Math.min(100,E/Eo*100))+'%',cx,gy+(H-gy)*.26,Math.min(W*.1,44))}
+else{T(Math.round(pct)+'%',cx,gy+(H-gy)*.2,Math.min(W*.11,50));T(msg[0],cx,gy+(H-gy)*.46,Math.min(W*.043,17),.95);T(msg[1],cx,gy+(H-gy)*.62,Math.min(W*.036,14),.8);T(ok?'Ketuk untuk ronde berikutnya':'Kurang dari 90%. Ketuk untuk ulang',cx,gy+(H-gy)*.84,Math.min(W*.045,18))}}
+function frame(ts){const dt=Math.min((ts-lastT)/1000||0,.05);lastT=ts;
+if(st==='aim'){if(ban>0)ban-=dt;else{beta+=dir*(55+score*6)*dt;if(beta>55){beta=55;dir=-1}if(beta<-55){beta=-55;dir=1}}}
+else if(st==='run'){const dh=12/(RM?1.5:4)*dt,b=beta*R2;let n=Math.max(1,Math.round(dh/.05)),h=dh/n;for(let i=0;i<n;i++){const s=sun(D0,t);if(s.u>0)E+=G(s)*inc(s,b)*h;t+=h}if(t>=18)finish()}
+draw();requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+</script></body></html>

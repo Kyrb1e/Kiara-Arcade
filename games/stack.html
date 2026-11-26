@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="id" data-game="stack">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!--
+ MUSIK: "Terang di Kiarakoneng" (komposisi orisinal, dibuat prosedural dengan WebAudio)
+ Kunci C mayor (pentatonik C-D-E-G-A), birama 4/4, 8 birama, diulang. Tempo: Siang 100 BPM, Malam 76 BPM, Hujan 88 BPM.
+ Akord per birama: C | F | Am | G | C | F | G | C
+ Melodi (nomor di kurung = jumlah ketukan, tanpa angka = 1 ketukan):
+ | E5 G5 A5 G5 | E5 D5 C5(2) | D5 E5 G5 E5 | D5(2) C5 A4 | C5 E5 G5 A5 | C6(1.5) A5(.5) G5(2) | E5 G5 E5 D5 | C5(4) |
+ Bass: akar akord di ketukan 1, kuint di ketukan 3. Data lengkap ada di konstanta SONG pada skrip.
+-->
+<title>Kiara Stack</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--ink:#0e3b43;--card:#ffffffee;--btn:#f2b705;--btnt:#2b2200}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#e8fff6;--card:#10262cee;--btn:#f2b705;--btnt:#2b2200}}
+:root[data-theme="dark"]{--ink:#e8fff6;--card:#10262cee}
+html,body{height:100%;margin:0;background:#2a9d9a;font-family:"Trebuchet MS","Segoe UI",sans-serif;overflow:hidden;touch-action:manipulation;user-select:none}
+canvas{display:block;width:100%;height:100%}
+#hud{position:absolute;left:0;right:0;top:env(safe-area-inset-top,0px);padding:12px;color:#fff;pointer-events:none;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+#seg{font-size:clamp(40px,12vw,64px);font-weight:300;line-height:1}
+#seg small{font-size:.35em;opacity:.85}
+#info{text-align:right;font-size:14px;line-height:1.5}
+#ov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:var(--card);color:var(--ink);border-radius:18px;padding:22px 20px 18px;width:min(100%,360px);text-align:center;box-shadow:0 12px 40px #0005;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.card h1{font-size:26px;margin:0 0 8px;font-weight:600}
+.card p{margin:6px 0;font-size:14px;line-height:1.5}
+.big{font-size:56px;font-weight:300;margin:4px 0}
+button{margin-top:14px;background:var(--btn);color:var(--btnt);border:0;border-radius:10px;padding:12px 26px;font-size:16px;font-weight:700;cursor:pointer}
+button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.hide{display:none!important}
+.card{max-height:100%;overflow:auto}
+#toast{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);transform:translateX(-50%);width:min(92vw,420px);background:rgba(8,28,36,.74);color:#fff;border-radius:14px;padding:10px 14px;font-size:13px;line-height:1.45;pointer-events:none;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);animation:tin .35s ease-out}
+#toast b{display:block;color:#ffe27a;font-size:12px;margin-bottom:2px}
+@keyframes tin{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
+.edu{background:rgba(242,183,5,.18);border-radius:12px;padding:8px 12px;margin-top:8px;text-align:left;font-size:13px;line-height:1.45}
+.edu b{display:block;font-size:12px;margin-bottom:2px}
+.lp{text-align:left}.lp h2{font-size:18px;margin:0 0 8px}.lp p{font-size:14px;line-height:1.5;margin:8px 0}.lp ul{margin:8px 0;padding-left:18px;font-size:14px;line-height:1.5}.lp li{margin-bottom:4px}
+.dots{display:flex;justify-content:center;gap:6px;margin-top:10px}.dots i{width:8px;height:8px;border-radius:50%;background:var(--ink);opacity:.25}.dots i.on{opacity:.9}
+@media (prefers-reduced-motion:reduce){#toast{animation:none}}
+.pnl{background:rgba(8,28,36,.34);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-radius:12px;padding:8px 10px}
+#info{margin-left:auto;min-width:0;font-size:12.5px}#lvl{font-weight:700}
+#pz,#mu{pointer-events:auto;margin:0;width:40px;height:40px;padding:0;flex:none;border-radius:12px;background:rgba(8,28,36,.34);color:#fff;font-size:12px;letter-spacing:-2px}#mu{font-size:18px;letter-spacing:0}.btns{display:flex;flex-direction:column;gap:6px;flex:none}.mu2{margin:10px 0 0;padding:8px 14px;font-size:13px;width:100%}
+#hint{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 28px);transform:translateX(-50%);background:rgba(8,28,36,.5);color:#fff;padding:10px 16px;border-radius:999px;font-size:14px;pointer-events:none;white-space:nowrap}
+.row{display:flex;gap:8px}.row button{flex:1;margin-top:14px;padding:12px 8px}.row .alt{margin-left:0}
+.stat{display:flex;justify-content:center;flex-wrap:wrap;gap:4px 14px;font-size:13px;opacity:.85;margin-top:6px}
+.rec{display:inline-block;background:var(--btn);color:var(--btnt);font-size:12px;font-weight:700;border-radius:999px;padding:3px 10px;margin-bottom:6px}
+.card .sub{font-weight:600;font-size:15px}.card .how{opacity:.8;font-size:13px}
+.lvls{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.lv{margin:0;width:100%;display:flex;gap:12px;align-items:center;text-align:left;padding:10px 14px;border-radius:12px}
+.lv .ic{font-size:26px;line-height:1}.lv .tx{flex:1;display:flex;flex-direction:column;line-height:1.25}.lv .tx b{font-size:16px}.lv .tx small{font-size:12px;font-weight:500;opacity:.8}.lv .bs{font-size:12px;font-weight:600;opacity:.85;white-space:nowrap}
+.lv[data-m=malam]{background:#1b2a5c;color:#fff}
+.lv[data-m=hujan]{background:#5b7284;color:#fff}
+.alt{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink);margin-left:8px}
+.pips{display:flex;gap:2px;width:min(32vw,230px)}
+.pip{flex:1;min-width:0;height:10px;border-radius:3px;background:rgba(255,255,255,.28);box-shadow:0 1px 3px #0003}
+.pip.cur{background:#fff;animation:blink .7s ease-in-out infinite alternate}
+@keyframes blink{from{opacity:.4}to{opacity:1}}
+#cmb{display:inline-block;transform-origin:left center;margin-top:8px;font-size:clamp(18px,5vw,24px);font-weight:700;color:#ffe27a;min-height:1.3em}
+#cmb.bump{animation:bump .35s ease-out}
+@keyframes bump{0%{transform:scale(1.7)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.pip.cur,#cmb.bump{animation:none}}
+.meter{height:8px;border-radius:4px;background:#0003;overflow:hidden;margin:6px 0 10px}
+.meter i{display:block;height:100%;background:linear-gradient(90deg,#ff8c32,#fff3c4)}
+#bkx{position:fixed;z-index:50;top:calc(env(safe-area-inset-top,0px) + 12px);right:108px;width:40px;height:40px;min-height:0;margin:0;padding:0;display:flex;align-items:center;justify-content:center;border:0;border-radius:12px;background:rgba(8,28,36,.42);color:#fff;font:700 26px/1 "Trebuchet MS",sans-serif;letter-spacing:0;text-transform:none;box-shadow:none;cursor:pointer}
+#bkx:focus-visible{outline:3px solid #fff;outline-offset:2px}
+#info{margin-right:50px}
+#ov[style*="flex-end"]{z-index:30;align-items:flex-start!important;background:#2f6bdf;padding:calc(env(safe-area-inset-top,0px) + 64px) 20px calc(env(safe-area-inset-bottom,0px) + 28px);overflow:auto;animation:pgin .3s ease-out}
+#ov[style*="flex-end"] .card{--ink:#fff;--card:transparent;background:transparent;color:#fff;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;max-height:none;overflow:visible;width:min(100%,420px);margin:auto;padding:0;text-align:center}
+#ov[style*="flex-end"] .card:has(.big)::before{content:"Hasil permainan";display:block;font-size:13px;letter-spacing:4px;text-transform:uppercase;opacity:.75;margin-bottom:14px}
+#ov[style*="flex-end"] .big{font-size:96px;font-weight:900;line-height:1;margin:6px 0}
+#ov[style*="flex-end"] .card h1{font-size:30px;font-weight:900}
+@keyframes pgin{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+.an{margin-top:8px;text-align:left}.an b{display:block;font-size:12px;letter-spacing:1px;text-transform:uppercase;opacity:.85}.bars{display:flex;align-items:flex-end;gap:3px;height:86px;padding-top:16px;margin:8px 0 0;border-bottom:2px solid rgba(255,255,255,.4)}.bars i{flex:1;position:relative;background:rgba(255,255,255,.55);border-radius:3px 3px 0 0}.bars i em{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:2px;font-style:normal;font-weight:900;line-height:1;white-space:nowrap}.bars i.pf{background:#ffe45c}.bars i.pw{background:#ff7a6b}.bx{display:flex;gap:3px;margin:2px 0 4px}.bx span{flex:1;text-align:center;opacity:.7;font-weight:700}.an .dl{opacity:.8;font-size:12px;word-break:break-word}.an .cap{opacity:.65;font-size:11px;line-height:1.4}.an p{margin:4px 0;font-size:13px}.an .seq{font-weight:900;word-break:break-word}</style>
+<script src="../js/teks.js?v=202611261444"></script>
+<script src="../js/kontrol.js?v=202611261444"></script>
+<link rel="stylesheet" href="../css/fonts.css?v=202611261444">
+<link rel="stylesheet" href="../css/game.css?v=202611261444">
+<script>try{document.fonts.load('700 16px Fredoka');document.fonts.load('16px "Lilita One"')}catch(e){}</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud"><div class="pnl" id="left"><div id="seg"></div><div id="cmb"></div></div><div id="info" class="pnl"><div id="lvl">Dusun Kiarakoneng 1</div><div id="lbl">Segmen tiang</div></div><div class="btns"><button id="mu" aria-label="Musik">🔊</button><button id="pz" aria-label="Jeda">❚❚</button></div></div>
+<div id="hint" class="hide">Ketuk layar untuk menaruh blok</div>
+<div id="toast" class="hide" role="status" aria-live="polite"></div>
+<div id="ov"><div class="card" id="card">
+<h1>Kiara Stack</h1>
+<p>Terangi Dusun Kiarakoneng 1: bangun tiang PJU tenaga surya dari 10 segmen tiang, lalu pasang 1 modul panel surya di puncak.</p>
+<p>Ketuk layar tepat saat blok sejajar. Bagian yang meleset terpotong.</p>
+<p><b>Pilih level</b></p><div class="lvls"><button class="lv" data-m="siang"><b>Siang</b><span>10 tiang + 1 panel</span></button><button class="lv" data-m="malam"><b>Malam</b><span>15 tiang + 1 panel</span></button><button class="lv" data-m="hujan"><b>Hujan</b><span>20 tiang + 1 panel</span></button></div>
+</div></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const seg=document.getElementById('seg'),lvlEl=document.getElementById('lvl'),lbl=document.getElementById('lbl'),cmb=document.getElementById('cmb');
+const ov=document.getElementById('ov'),card=document.getElementById('card');
+let W,H,DPR,S=1;
+function rs(){DPR=window.devicePixelRatio||1;W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;S=Math.min(W/480,H*.58/430)}
+addEventListener('resize',rs);rs();
+const BASE=200,LH=22;let TOTAL=11;
+let hist=[],layers=[],cur=null,falls=[],state='menu',level=1,cam=0,night=0,pct=0,last=0,combo=0,flash=[];
+function reset(){hist=[];layers=[{x:0,z:0,w:BASE,d:BASE}];falls=[];flash=[];combo=0;perfN=0;maxCombo=0;night=0;cam=0;spawn();state='play';upd()}
+function spawn(){
+  const n=layers.length,t=layers[n-1],ax=n%2?'x':'z';
+  cur={ax,w:t.w,d:t.d,x:t.x,z:t.z,dir:1,y:n};
+  cur[ax]=t[ax]-185;
+}
+function upd(){
+  const n=layers.length-(state==='play'?0:1);
+  seg.innerHTML=Math.min(n,TOTAL)+'<small>/11</small>';
+  lvlEl.textContent='Kota '+level;
+  lbl.textContent=layers.length===TOTAL&&state==='play'?'Modul panel surya':'Segmen tiang';
+}
+function col(i,l,s){const t=Math.min(i/10,1);return `hsl(${205-t*155},${60+t*30}%,${(36+t*26)+l}%)`}
+function iso(X,Z,Y){return [(X-Z)*.866*S+W/2,(X+Z)*.5*S-Y*S+H*.62+cam*S]}
+function box(b,i,yo,panel){
+  const y0=i*LH+(yo||0),y1=y0+LH,hw=b.w/2,hd=b.d/2;
+  const p=(x,z,y)=>iso(b.x+x,b.z+z,y);
+  const poly=(pts,c)=>{ctx.beginPath();pts.forEach((q,k)=>k?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.closePath();ctx.fillStyle=c;ctx.fill()};
+  if(panel){panelBox(b,y0,y1,hw,hd,p,poly);return}
+  poly([p(-hw,hd,y0),p(hw,hd,y0),p(hw,hd,y1),p(-hw,hd,y1)],panel?'hsl(44,90%,50%)':col(i,-2));
+  poly([p(hw,hd,y0),p(hw,-hd,y0),p(hw,-hd,y1),p(hw,hd,y1)],panel?'hsl(40,85%,42%)':col(i,-9));
+  poly([p(-hw,-hd,y1),p(hw,-hd,y1),p(hw,hd,y1),p(-hw,hd,y1)],panel?'hsl(48,100%,66%)':col(i,7));
+  if(panel){ctx.strokeStyle='#7a5a00';ctx.lineWidth=1.2*S;
+    for(let k=1;k<4;k++){const f=k/4;
+      ctx.beginPath();let a=p(-hw+f*b.w,-hd,y1),c=p(-hw+f*b.w,hd,y1);ctx.moveTo(a[0],a[1]);ctx.lineTo(c[0],c[1]);
+      a=p(-hw,-hd+f*b.d,y1);c=p(hw,-hd+f*b.d,y1);ctx.moveTo(a[0],a[1]);ctx.lineTo(c[0],c[1]);ctx.stroke()}}
+}
+function panelBox(b,y0,y1,hw,hd,p,poly){
+  const ym=y0+(y1-y0)*.45,ih=hw*.55,id=hd*.55;
+  poly([p(-ih,id,y0),p(ih,id,y0),p(ih,id,ym),p(-ih,id,ym)],'#2b3138');
+  poly([p(ih,id,y0),p(ih,-id,y0),p(ih,-id,ym),p(ih,id,ym)],'#1b2025');
+  poly([p(-hw,hd,ym),p(hw,hd,ym),p(hw,hd,y1),p(-hw,hd,y1)],'hsl(210,10%,74%)');
+  poly([p(hw,hd,ym),p(hw,-hd,ym),p(hw,-hd,y1),p(hw,hd,y1)],'hsl(210,10%,50%)');
+  poly([p(-hw,-hd,y1),p(hw,-hd,y1),p(hw,hd,y1),p(-hw,hd,y1)],'hsl(210,12%,84%)');
+  const m=Math.max(1.5,Math.min(b.w,b.d)*.06),iw=b.w-2*m,idp=b.d-2*m;
+  if(iw<=2||idp<=2)return;
+  const Q=(u,v)=>p(-hw+m+u*iw,-hd+m+v*idp,y1);
+  const A=Q(0,0),B=Q(1,0),C=Q(1,1),D=Q(0,1);
+  const g=ctx.createLinearGradient(D[0],D[1],B[0],B[1]);
+  g.addColorStop(0,'#0c2257');g.addColorStop(.5,'#1d3f8c');g.addColorStop(1,'#0a1c48');
+  poly([A,B,C,D],g);
+  const cols=Math.max(2,Math.round(b.w/32)),rows=Math.max(2,Math.round(b.d/32));
+  const ln=(a,c)=>{ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(c[0],c[1]);ctx.stroke()};
+  ctx.lineWidth=Math.max(.5,.5*S);ctx.strokeStyle='rgba(220,230,255,.18)';
+  for(let i=1;i<=cols;i++){const u=(i-.5)/cols;ln(Q(u,0),Q(u,1))}
+  ctx.lineWidth=Math.max(.7,.9*S);ctx.strokeStyle='rgba(190,215,255,.45)';
+  for(let i=1;i<cols;i++)ln(Q(i/cols,0),Q(i/cols,1));
+  for(let j=1;j<rows;j++)ln(Q(0,j/rows),Q(1,j/rows));
+  poly([Q(.3,0),Q(.46,0),Q(.16,1),Q(0,1)],'rgba(255,255,255,.12)');
+  ctx.strokeStyle='rgba(0,0,0,.35)';ctx.lineWidth=Math.max(.7,S);
+  ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.lineTo(C[0],C[1]);ctx.lineTo(D[0],D[1]);ctx.closePath();ctx.stroke();
+}
+function place(){
+  const t=layers[layers.length-1],a=cur.ax,sz=a==='x'?'w':'d';
+  const delta=cur[a]-t[a],size=t[sz],ov=size-Math.abs(delta);
+  if(ov<=0){falls.push({...cur,i:layers.length,vy:0,yo:0});hist.push({p:0,m:1});fail();return}
+  const nb={x:cur.x,z:cur.z,w:cur.w,d:cur.d};
+  if(Math.abs(delta)<5){nb[a]=t[a];combo++;if(combo>2)nb[sz]=Math.min(BASE,nb[sz]+10);flash.push({x:nb.x,z:nb.z,w:nb.w,d:nb.d,i:layers.length,t:0});onPerfect(nb)}
+  else{
+    combo=0;nb[sz]=ov;nb[a]=t[a]+delta/2;
+    const f={x:cur.x,z:cur.z,w:cur.w,d:cur.d,i:layers.length,vy:0,yo:0};
+    f[sz]=Math.abs(delta);f[a]=(t[a]+cur[a])/2+Math.sign(delta)*size/2;falls.push(f);
+  }
+  layers.push(nb);hist.push({p:Math.round(nb.w*nb.d/(BASE*BASE)*100),f:Math.abs(delta)<5});
+  if(layers.length>TOTAL){finish()}else{spawn()}
+  upd();
+}
+function fail(){pct=0;state='result';upd();show()}
+function finish(){
+  const p=layers[TOTAL];pct=Math.round(p.w*p.d/(BASE*BASE)*100);state='result';upd();show();
+}
+function an(){
+  const H=hist,n=H.length;if(!n)return '';
+  const ps=H.map(h=>h.p),pf=H.filter(h=>h.f).length,miss=H.some(h=>h.m);
+  let run=0,mr=0;H.forEach(h=>{run=h.f?run+1:0;mr=Math.max(mr,run)});
+  const dr=ps.map((p,i)=>(i?ps[i-1]:100)-p);
+  let wd=0,wi=-1;dr.forEach((l,i)=>{if(l>wd){wd=l;wi=i}});
+  const sum=a=>a.reduce((x,y)=>x+y,0),avg=Math.round(sum(ps)/n),h2=n>>1,a1=sum(ps.slice(0,h2))/(h2||1),a2=sum(ps.slice(h2))/((n-h2)||1);
+  const nm=i=>i===TOTAL-1?'panel':'balok '+(i+1);
+  const sg=d=>d>0?'\u2212'+d:d<0?'+'+(-d):'0';
+  const last=ps[n-1],prevP=n>1?ps[n-2]:100;
+  let tip;
+  if(miss)tip='Meleset total di '+nm(n-1)+' (tumpukan sebelumnya '+prevP+'%). Ketuk saat blok persis sejajar dengan tumpukan.';
+  else if(pf===n)tip='Semua balok tepat sempurna. Presisi kamu luar biasa!';
+  else if(wd>=20)tip='Satu ketukan di '+nm(wi)+' menghabiskan '+wd+' poin ('+(wi?ps[wi-1]:100)+'% menjadi '+ps[wi]+'%). Setelah itu blok makin sempit dan sulit dikejar. Pelankan ritme tepat sebelum titik itu.';
+  else if(a1-a2>=10)tip='Presisi turun di paruh akhir (rata-rata '+Math.round(a1)+'% lalu '+Math.round(a2)+'%). Blok makin sempit, jadi tunggu sampai benar-benar sejajar.';
+  else if(sum(dr.slice(0,3))>=15)tip='Tiga balok pertama sudah kehilangan '+sum(dr.slice(0,3))+' poin. Ketukan awal menentukan lebar seluruh tiang, jadi mulai dengan tenang.';
+  else if(wd>=12)tip='Penurunan terbesar di '+nm(wi)+': '+(wi?ps[wi-1]:100)+'% menjadi '+ps[wi]+'% (turun '+wd+'). Ketukan terlalu cepat atau terlambat di titik itu.';
+  else tip='Ritme stabil: presisi hilang sedikit demi sedikit dan merata.';
+  const gap=pct<80?' Kurang '+(80-pct)+' poin dari target 80%.':'';
+  const hint=(!miss&&pf<n&&mr<3)?' Tepat sempurna 3 kali berturut-turut akan melebarkan balok kembali.':'';
+  const lab=n<=16,fs=n<=11?11:9;
+  const bars=ps.map((p,i)=>'<i class="'+(H[i].f?'pf':i===wi&&wd>=12?'pw':'')+'" style="height:'+Math.max(4,Math.round(p*.62))+'px"'+(lab?' title="'+nm(i)+': '+p+'%"':'')+'>'+(lab?'<em style="font-size:'+fs+'px">'+(H[i].m?'\u2715':p)+'</em>':'')+'</i>').join('');
+  const idx=lab?'<div class="bx">'+ps.map((p,i)=>'<span style="font-size:'+fs+'px">'+(i===TOTAL-1?'P':i+1)+'</span>').join('')+'</div>':'';
+  return '<div class="an"><b>Analisis presisi</b><div class="bars">'+bars+'</div>'+idx+'<p class="seq">'+ps.join(', ')+'</p><p class="dl">Selisih '+dr.map(sg).join(', ')+'</p><p>Tepat sempurna '+pf+'/'+n+', rangkaian terpanjang '+mr+', rata-rata '+avg+'%</p><p>'+tip+gap+hint+'</p><p class="cap">Persen = luas balok dibanding pondasi (100%). Kuning = tepat sempurna, merah = penurunan terbesar. P = panel surya.</p></div>';
+}
+function show(){
+  let t,d,btn;
+  if(pct>=90){t='Solar Master';d='Panel terpasang nyaris sempurna. PJU menyala terang sepanjang malam.';btn='Kota berikutnya'}
+  else if(pct>=60){t='Standard Operation';d='Tiang sedikit miring dan panel mengecil. Lampu redup dan hanya bertahan setengah malam.';btn='Main lagi'}
+  else{t='Blackout';d='Panel terlalu kecil atau jatuh. PJU gagal beroperasi dan wilayah tetap gelap.';btn='Ulangi level'}
+  card.innerHTML=`<h1>${t}</h1><div class="big">${pct}%</div><p>${d}</p><p>Luas panel dibanding pondasi: ${pct}%</p>${an()}<button id="go2">${btn}</button>`;
+  ov.classList.remove('hide');
+  document.getElementById('go2').onclick=()=>{if(pct>=90)level++;ov.classList.add('hide');reset()};
+}
+const TIERS=[
+ [95,'Lampu jalan','Terang benderang seperti lampu jalan raya. Jalan terang sepanjang malam.','255,248,230'],
+ [80,'Lampu taman','Terang nyaman seperti lampu taman kota.','255,236,190'],
+ [60,'Lampu teras','Cukup untuk menerangi halaman, seperti bohlam teras rumah.','255,214,140'],
+ [40,'Lampu tidur','Redup dan hangat, seperti lampu tidur.','255,190,105'],
+ [25,'Lilin fine dining','Temaram romantis seperti lilin di meja makan.','255,165,70'],
+ [10,'Nyala korek','Hanya cukup untuk melihat beberapa langkah.','255,140,50'],
+ [0,'Blackout','Panel nyaris tidak menangkap cahaya. PJU padam, wilayah tetap gelap.','0,0,0']];
+const TIERS2=[
+ [95,'Lampu jalan','Terang benderang seperti lampu jalan raya. Jalan terang sepanjang malam.'],
+ [90,'Lampu jalan kompleks','Terang merata, aman untuk jalan perumahan.'],
+ [85,'Lampu parkiran','Terang lebar, seluruh area terlihat jelas.'],
+ [80,'Lampu taman kota','Terang nyaman untuk berjalan malam.'],
+ [75,'Lampu gerbang','Cukup terang untuk mengenali wajah dari jauh.'],
+ [70,'Lampu teras terang','Halaman depan terlihat jelas.'],
+ [65,'Lampu teras','Seperti bohlam teras rumah.'],
+ [60,'Lampu ruang tamu','Hangat dan cukup untuk beraktivitas.'],
+ [55,'Lampu koridor','Cukup untuk berjalan, tapi mulai redup.'],
+ [50,'Lampu kamar','Setengah terang, suasana santai.'],
+ [45,'Lampu baca','Fokus ke satu area, sekitarnya mulai gelap.'],
+ [40,'Lampu tidur','Redup dan hangat, seperti lampu tidur.'],
+ [35,'Lampu meja redup','Remang, hanya cukup untuk satu meja.'],
+ [30,'Lentera','Cahaya kecil bergoyang seperti lentera.'],
+ [25,'Lilin fine dining','Temaram romantis seperti lilin di meja makan.'],
+ [10,'Nyala korek','Hanya cukup untuk melihat beberapa langkah.'],
+ [0,'Blackout','Panel nyaris tidak menangkap cahaya. PJU padam, wilayah tetap gelap.']];
+function tier(p){
+  const t=TIERS2.find(x=>p>=x[0]);
+  const w=Math.max(0,Math.min(1,(p-25)/75));
+  const rgb=p<10?'0,0,0':`255,${Math.round(165+83*w)},${Math.round(70+160*w)}`;
+  return [t[0],t[1],t[2],rgb];
+}
+function glow(){
+  if(state!=='result'||layers.length<=TOTAL||pct<10)return;
+  const T=tier(pct),I=pct/100,tm=performance.now()/1000;
+  let f=1;if(pct<40)f=1+.09*Math.sin(tm*9)+.05*Math.sin(tm*23.7+1)+.03*Math.sin(tm*37);
+  const b=layers[TOTAL],c=iso(b.x,b.z,TOTAL*LH-4);
+  const R=(40+380*Math.pow(I,1.2))*S*night*f,a=(.12+.78*I)*Math.min(1,night);
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  const g=ctx.createRadialGradient(c[0],c[1],0,c[0],c[1],R);
+  g.addColorStop(0,`rgba(${T[3]},${a})`);g.addColorStop(.25,`rgba(${T[3]},${a*.45})`);g.addColorStop(1,`rgba(${T[3]},0)`);
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  ctx.beginPath();ctx.arc(c[0],c[1],(3+9*I)*S,0,7);ctx.fillStyle=`rgba(255,255,255,${Math.min(1,a+.2)})`;ctx.fill();
+  ctx.restore();
+}
+function show(){
+  const T=tier(pct),up=pct>=80;
+  card.innerHTML=`<h1>${T[1]}</h1><div class="big">${pct}%</div><div class="meter"><i style="width:${pct}%"></i></div><p>${T[2]}</p><p>${up?'Cukup terang, kota berikutnya terbuka.':'Butuh 80% atau lebih untuk lanjut ke kota berikutnya.'}</p><button id="go2">${up?'Kota berikutnya':'Main lagi'}</button>`;
+  ov.style.alignItems='flex-end';ov.classList.remove('hide');
+  document.getElementById('go2').onclick=()=>{if(up)level++;ov.classList.add('hide');reset()};
+}
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let parts=[],pops=[],shake=0,flashA=0,flashC='255,255,255',cg=0,lastCombo=0;
+function upd(){
+  const placed=Math.min(layers.length-1,TOTAL);
+  let h='<div class="pips">';
+  for(let i=0;i<TOTAL;i++){
+    const on=i<placed,cu=state==='play'&&i===placed;
+    const bg=on?(i===TOTAL-1?'hsl(46,95%,56%)':col(i+1,0)):'';
+    h+=`<i class="pip${cu?' cur':''}"${bg?` style="background:${bg}"`:''}></i>`;
+  }
+  seg.innerHTML=h+'</div>';
+  lvlEl.textContent='Dusun Kiarakoneng 1';
+  lbl.textContent=state==='play'?(layers.length>=TOTAL?'Pasang panel surya':'Segmen tiang '+layers.length+' dari '+(TOTAL-1)):'Selesai';
+  cmb.textContent=combo>=2?'Combo ×'+combo:(combo===1?'Perfect':'');
+  if(combo>lastCombo){cmb.classList.remove('bump');void cmb.offsetWidth;cmb.classList.add('bump')}
+  lastCombo=combo;lvlEl.textContent='Dusun Kiarakoneng 1';
+  lbl.textContent=state==='play'?MODE.name+', '+(layers.length>=TOTAL?'Panel surya':'Tiang '+layers.length+'/'+(TOTAL-1)):'Selesai';
+  const hn=document.getElementById('hint'),pz=document.getElementById('pz'),hd=document.getElementById('hud');
+  hn.classList.toggle('hide',!(state==='play'&&layers.length===1));
+  pz.classList.toggle('hide',state!=='play'&&state!=='pause');
+  hd.classList.toggle('hide',state==='menu');eduTick();
+}
+function onPerfect(nb){perfN++;maxCombo=Math.max(maxCombo,combo);sfxPerfect(combo);
+  const big=combo>=3,y=layers.length*LH+LH,hw=nb.w/2,hd=nb.d/2,cc=iso(nb.x,nb.z,y);
+  shake=RM?0:Math.min(1,.25+.12*combo);
+  flashA=RM?.06:(big?.28:.14);flashC=big?'255,226,120':'255,255,255';
+  const N=RM?8:Math.min(60,14+combo*8);
+  for(let k=0;k<N;k++){
+    const s=Math.random()*4|0,u=Math.random();
+    const q=s===0?[-hw+u*nb.w,-hd]:s===1?[-hw+u*nb.w,hd]:s===2?[-hw,-hd+u*nb.d]:[hw,-hd+u*nb.d];
+    const c=iso(nb.x+q[0],nb.z+q[1],y),L=.6+Math.random()*.7;
+    parts.push({x:c[0],y:c[1],vx:(c[0]-cc[0])*(1.2+Math.random())+(Math.random()-.5)*60*S,vy:(c[1]-cc[1])*.8-(80+Math.random()*180)*S,g:420*S,life:L,max:L,s:1.6+Math.random()*2.6,c:`255,${190+Math.random()*65|0},${90+Math.random()*130|0}`});
+  }
+  pops.push({txt:big?'COMBO ×'+combo:'PERFECT',sub:big&&(nb.w<BASE||nb.d<BASE)?'Blok melebar':'',t:0,big});
+}
+function updFx(dt){
+  shake=Math.max(0,shake-dt*3.2);flashA=Math.max(0,flashA-dt*1.6);musicTick();
+  if(MODE.rain&&state==='play'&&!RM&&Math.random()<dt*.12){flashA=.35;flashC='210,225,255'}
+  cg+=(((state==='play'&&combo>=3)?1:0)-cg)*Math.min(1,dt*4);
+  parts.forEach(p=>{p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=p.g*dt});
+  parts=parts.filter(p=>p.life>0);
+  pops.forEach(p=>p.t+=dt/1.1);pops=pops.filter(p=>p.t<1);
+  if(state==='play'&&combo>=3&&!RM&&Math.random()<dt*28&&layers.length){
+    const t=layers[layers.length-1],c=iso(t.x+(Math.random()-.5)*t.w,t.z+(Math.random()-.5)*t.d,layers.length*LH);
+    parts.push({x:c[0],y:c[1],vx:(Math.random()-.5)*30*S,vy:-(30+Math.random()*60)*S,g:0,life:.9,max:.9,s:2.2,c:'255,235,150'});
+  }
+}
+function drawFx(){
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  if(cg>.01){
+    const r0=Math.min(W,H)*.3,r1=Math.hypot(W,H)*.6,g=ctx.createRadialGradient(W/2,H/2,r0,W/2,H/2,r1);
+    g.addColorStop(0,'rgba(255,200,60,0)');g.addColorStop(1,`rgba(255,200,60,${.3*cg})`);
+    ctx.fillStyle=g;ctx.fillRect(-10,-10,W+20,H+20);
+  }
+  if(state==='play'&&combo>=3&&layers.length){
+    const t=layers[layers.length-1],c=iso(t.x,t.z,layers.length*LH),r=(150+25*Math.sin(performance.now()/160))*S;
+    const g=ctx.createRadialGradient(c[0],c[1],0,c[0],c[1],r);
+    g.addColorStop(0,'rgba(255,220,110,.45)');g.addColorStop(1,'rgba(255,220,110,0)');
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  }
+  parts.forEach(p=>{const a=Math.max(0,p.life/p.max);ctx.fillStyle=`rgba(${p.c},${a})`;ctx.beginPath();ctx.arc(p.x,p.y,p.s*S*(.4+.6*a),0,7);ctx.fill()});
+  if(flashA>.01){ctx.fillStyle=`rgba(${flashC},${flashA})`;ctx.fillRect(-10,-10,W+20,H+20)}
+  ctx.restore();
+  pops.forEach(p=>{
+    const k=p.t,sc=1+Math.max(0,1-k*6)*.7,y=H*.27-k*50,fs=Math.min(W*.12,58)*sc;
+    ctx.save();ctx.globalAlpha=Math.max(0,1-k*k);ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';
+    ctx.font=`700 ${fs}px Fredoka,"Segoe UI",sans-serif`;ctx.lineWidth=fs*.14;ctx.strokeStyle='rgba(20,40,60,.55)';
+    ctx.strokeText(p.txt,W/2,y);ctx.fillStyle=p.big?'#ffd84a':'#ffffff';ctx.fillText(p.txt,W/2,y);
+    if(p.sub){const f2=fs*.38;ctx.font=`700 ${f2}px Fredoka,"Segoe UI",sans-serif`;ctx.lineWidth=f2*.18;ctx.strokeText(p.sub,W/2,y+fs*.75);ctx.fillText(p.sub,W/2,y+fs*.75)}
+    ctx.restore();
+  });
+}
+function show(){
+  const T=tier(pct),up=pct>=80;
+  const msg=pct>=95?'Dusun Kiarakoneng 1 terang benderang!':up?'Dusun Kiarakoneng 1 kini terang. Kejar 95% untuk lampu jalan penuh.':'Dusun Kiarakoneng 1 masih kurang terang. Targetnya 80% atau lebih.';
+  card.innerHTML=`<h1>${T[1]}</h1><div class="big">${pct}%</div><div class="meter"><i style="width:${pct}%"></i></div><p>${T[2]}</p><p>${msg}</p><button id="go2">${up?'Main lagi':'Main lagi'}</button><button id="go3" class="alt">Pilih level</button>`;
+  ov.style.alignItems='flex-end';ov.classList.remove('hide');
+  document.getElementById('go2').onclick=()=>{ov.classList.add('hide');reset()};document.getElementById('go3').onclick=showMenu;
+}
+const MODES={
+ siang:{name:'Siang',total:11,sp:1,c0:[60,155,160],c1:[170,225,180],stars:false,rain:false},
+ malam:{name:'Malam',total:16,sp:1.1,c0:[16,26,60],c1:[34,52,92],stars:true,rain:false},
+ hujan:{name:'Hujan',total:21,sp:1.2,c0:[58,74,90],c1:[112,130,140],stars:false,rain:true}};
+let MODE=MODES.siang;
+const MENU_HTML=card.innerHTML;
+lvlEl.textContent='';lbl.textContent='';
+function bindMenu(){document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>startMode(b.dataset.m))}
+function startMode(m){MODE=MODES[m];TOTAL=MODE.total;ov.classList.add('hide');ov.style.alignItems='center';reset()}
+function showMenu(){
+  state='menu';layers=[];falls=[];parts=[];pops=[];flash=[];combo=0;lastCombo=0;night=0;cam=0;cur=null;
+  seg.innerHTML='';cmb.textContent='';lbl.textContent='';lvlEl.textContent='';
+  card.innerHTML=MENU_HTML;bindMenu();ov.style.alignItems='center';ov.classList.remove('hide');
+}
+const STARS=Array.from({length:70},()=>({x:Math.random(),y:Math.random()*.65,r:.6+Math.random()*1.4,p:Math.random()*6}));
+function drawSky(){
+  if(!MODE.stars)return;
+  const t=performance.now()/1000;
+  ctx.save();ctx.fillStyle='#fff';
+  STARS.forEach(s=>{ctx.globalAlpha=RM?.6:.35+.45*Math.abs(Math.sin(t*.8+s.p));ctx.beginPath();ctx.arc(s.x*W,s.y*H,s.r*Math.max(1,S),0,7);ctx.fill()});
+  const mx=W*.17,my=H*.32,mr=Math.min(W,H)*.05;
+  const g=ctx.createRadialGradient(mx,my,mr*.8,mx,my,mr*3.2);
+  g.addColorStop(0,'rgba(240,238,210,.35)');g.addColorStop(1,'rgba(240,238,210,0)');
+  ctx.globalAlpha=1;ctx.fillStyle=g;ctx.fillRect(mx-mr*4,my-mr*4,mr*8,mr*8);
+  ctx.fillStyle='#f4f1da';ctx.beginPath();ctx.arc(mx,my,mr,0,7);ctx.fill();
+  ctx.restore();
+}
+const DROPS=Array.from({length:110},()=>({x:Math.random(),y:Math.random(),l:10+Math.random()*16,v:.9+Math.random()*.7}));
+function drawRain(){
+  if(!MODE.rain)return;
+  const t=performance.now()/1000,n=RM?30:DROPS.length;
+  ctx.save();ctx.strokeStyle='rgba(205,225,245,.4)';ctx.lineWidth=Math.max(1,1.2*S);ctx.beginPath();
+  for(let i=0;i<n;i++){const d=DROPS[i],y=((d.y+t*d.v*(RM?0:1))%1)*H,x=(d.x*W+y*.15)%W,l=d.l*S;ctx.moveTo(x,y);ctx.lineTo(x-l*.15,y-l)}
+  ctx.stroke();ctx.restore();
+}
+let VDK=0;
+function cbox(cx,cz,w,d,y0,h,top,side,P){
+  P=P||iso;side=side||top;
+  const hw=w/2,hd=d/2,y1=y0+h,q=(x,z,y)=>P(cx+x,cz+z,y);
+  const f=(c,dl)=>{const k=c[3]?0:VDK;return `hsl(${c[0]},${c[1]*(1-k*.3)}%,${Math.max(4,(c[2]+dl)*(1-k*.6))}%)`};
+  const poly=(pts,c)=>{ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();ctx.fillStyle=c;ctx.fill()};
+  poly([q(-hw,hd,y0),q(hw,hd,y0),q(hw,hd,y1),q(-hw,hd,y1)],f(side,0));
+  poly([q(hw,hd,y0),q(hw,-hd,y0),q(hw,-hd,y1),q(hw,hd,y1)],f(side,-9));
+  poly([q(-hw,-hd,y1),q(hw,-hd,y1),q(hw,hd,y1),q(-hw,hd,y1)],f(top,7));
+}
+const C_GRASS=[100,42,52],C_SOIL=[25,35,38],C_PAD=[40,25,78],C_CREAM=[40,45,86],C_ROOF=[12,60,50],C_ROOF2=[10,55,40],C_WIN=[48,90,62,1],C_TRUNK=[28,40,35],C_LEAF1=[125,40,34],C_LEAF2=[110,45,46],C_LEAF3=[95,50,58],C_FIELD=[70,55,58],C_FIELDS=[100,35,40],C_ROW=[78,50,46],C_HILL=[150,28,56],C_CLOUD=[200,25,97];
+const VITEMS=[
+ ['h',-30,230,54,54],['h',230,-30,54,54],['h',-210,60,54,54],['h',60,-210,54,54],
+ ['t',150,190],['t',190,150],['t',-120,200],['t',200,-120],['t',-250,-30],['t',-30,-250],['t',250,110],['t',110,250],['t',-170,-150],['t',-150,-170],
+ ['f',-250,-150,120,90],['f',-150,-260,100,80],['f',260,-170,110,90],['f',-300,120,90,110]
+].sort((a,b)=>(a[1]+a[2])-(b[1]+b[2]));
+function drawVillage(){
+  const t=performance.now()/1000,par=cam*S;
+  VDK=Math.max(night,MODE.stars?.55:MODE.rain?.3:0);
+  [[.1,.33,.8],[.5,.3,1.1],[.92,.34,.8]].forEach(a=>{
+    const s=S*a[2],ox=W*a[0],oy=H*a[1]+par*.3,P=(X,Z,Y)=>[(X-Z)*.866*s+ox,(X+Z)*.5*s-Y*s+oy];
+    for(let i=0;i<4;i++)cbox(0,0,170-i*38,120-i*26,i*14,14,C_HILL,null,P);
+  });
+  for(let k=0;k<4;k++){
+    const s=S*(.6+.12*(k%3)),ox=((t*(5+k*3)+k*W*.37)%(W+300))-150,oy=((H*(.08+k*.14)+par*.3)%(H*.6))+10;
+    const P=(X,Z,Y)=>[(X-Z)*.866*s+ox,(X+Z)*.5*s-Y*s+oy];
+    cbox(0,0,90,50,0,16,C_CLOUD,null,P);cbox(18,6,50,36,16,14,C_CLOUD,null,P);
+  }
+  cbox(0,0,760,760,-60,60,C_GRASS,C_SOIL);
+  cbox(0,0,240,240,0,3,C_PAD);
+  VITEMS.forEach(o=>{
+    const x=o[1],z=o[2];
+    if(o[0]==='h'){const w=o[3],d=o[4];
+      cbox(x,z,w,d,0,30,C_CREAM);cbox(x,z+d/2+.5,14,2,10,12,C_WIN);
+      cbox(x,z,w+10,d+10,30,7,C_ROOF);cbox(x,z,w-8,d-8,37,9,C_ROOF2);
+    }else if(o[0]==='t'){
+      cbox(x,z,8,8,0,14,C_TRUNK);cbox(x,z,32,32,14,18,C_LEAF1);cbox(x,z,24,24,32,16,C_LEAF2);cbox(x,z,15,15,48,14,C_LEAF3);
+    }else{
+      cbox(x,z,o[3],o[4],0,5,C_FIELD,C_FIELDS);
+      for(let k=-1;k<=1;k++)cbox(x,z+k*o[4]/3,o[3]-10,o[4]/7,5,1.5,C_ROW);
+    }
+  });
+}
+let perfN=0,maxCombo=0,curKey='siang';
+function loadBest(){try{return JSON.parse(localStorage.getItem('sts_best')||'{}')}catch(e){return{}}}
+function saveBest(o){try{localStorage.setItem('sts_best',JSON.stringify(o))}catch(e){}}
+let BEST=loadBest();
+function menuHTML(){
+  const b=k=>BEST[k]!=null?`Rekor ${BEST[k]}%`:'Belum dimainkan';
+  const L=(k,ic,n,s)=>`<button class="lv" data-m="${k}"><span class="ic" aria-hidden="true">${ic}</span><span class="tx"><b>${n}</b><small>${s}</small></span><span class="bs">${b(k)}</span></button>`;
+  return `<h1>Kiara Stack</h1><p class="sub">Terangi Dusun Kiarakoneng 1</p><div class="lvls">${L('siang','<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#f3cf8c" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="4.5" fill="#f3cf8c"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>','Siang','10 tiang + 1 panel')}${L('malam','<svg viewBox="0 0 24 24" width="30" height="30"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" fill="#f3cf8c"/></svg>','Malam','15 tiang + 1 panel')}${L('hujan','<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke-linecap="round"><path d="M7 15a4 4 0 0 1-.5-8 5.5 5.5 0 0 1 10.6 1.2A3.5 3.5 0 0 1 17 15z" fill="#f4f1ea"/><path d="M9 18l-1 3M13 18l-1 3M17 18l-1 3" stroke="#8fa3c7" stroke-width="2"/></svg>','Hujan','20 tiang + 1 panel')}</div><button class="alt mu2" id="mu2" type="button"></button>`;
+}
+function startMode(m){curKey=m;MODE=MODES[m];TOTAL=MODE.total;ov.classList.add('hide');ov.style.alignItems='center';reset()}
+function showMenu(){
+  state='menu';layers=[];falls=[];parts=[];pops=[];flash=[];combo=0;lastCombo=0;night=0;cam=0;cur=null;
+  seg.innerHTML='';cmb.textContent='';lbl.textContent='';lvlEl.textContent='';
+  ['hud','hint'].forEach(i=>document.getElementById(i).classList.add('hide'));
+  card.innerHTML=menuHTML();bindMenu();ov.style.alignItems='center';ov.classList.remove('hide');
+}
+function pauseGame(){
+  if(state!=='play')return;
+  state='pause';
+  card.innerHTML='<h1>Dijeda</h1><p>Posisi blok tetap tersimpan.</p><div class="row"><button id="rs">Lanjut</button></div><div class="row"><button id="rt" class="alt">Ulangi</button><button id="mn" class="alt">Pilih level</button></div>';
+  ov.style.alignItems='center';ov.classList.remove('hide');
+  document.getElementById('rs').onclick=()=>{ov.classList.add('hide');state='play'};
+  document.getElementById('rt').onclick=()=>{ov.classList.add('hide');reset()};
+  document.getElementById('mn').onclick=showMenu;
+}
+document.getElementById('pz').onclick=pauseGame;
+addEventListener('keydown',e=>{if(e.code==='Escape'||e.code==='KeyP'){if(state==='play')pauseGame();else if(state==='pause'){const r=document.getElementById('rs');if(r)r.click()}}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)pauseGame()});
+function show(){
+  const T=tier(pct),up=pct>=80,prev=BEST[curKey]||0,rec=pct>prev&&pct>0;
+  if(rec){BEST[curKey]=pct;saveBest(BEST)}
+  const msg=pct>=95?'Dusun Kiarakoneng 1 terang benderang!':up?'Dusun Kiarakoneng 1 kini terang. Kejar 95% untuk lampu jalan penuh.':'Dusun Kiarakoneng 1 masih kurang terang. Targetnya 80% atau lebih.';
+  card.innerHTML=`${rec?'<div class="rec">Rekor baru</div>':''}<h1>${T[1]}</h1><div class="big">${pct}%</div><div class="meter"><i style="width:${pct}%"></i></div><p>${T[2]}</p><p>${msg}</p><div class="stat"><span>Perfect ${perfN}</span><span>Combo terbaik ×${maxCombo}</span>${prev?`<span>Rekor ${Math.max(prev,pct)}%</span>`:''}</div><div class="row"><button id="go2">${up?'Main lagi':'Main lagi'}</button><button id="go3" class="alt">Pilih level</button></div>`;
+  ov.style.alignItems='flex-end';ov.classList.remove('hide');
+  document.getElementById('go2').onclick=()=>{ov.classList.add('hide');reset()};
+  document.getElementById('go3').onclick=showMenu;
+}
+card.innerHTML=menuHTML();document.getElementById('hud').classList.add('hide');
+/* ===== MUSIK "Terang di Kiarakoneng" =====
+   Komposisi orisinal. C mayor pentatonik, 4/4, 8 birama, loop. Akord: C|F|Am|G|C|F|G|C
+   Melodi: | E5 G5 A5 G5 | E5 D5 C5(2) | D5 E5 G5 E5 | D5(2) C5 A4 | C5 E5 G5 A5 | C6(1.5) A5(.5) G5(2) | E5 G5 E5 D5 | C5(4) |
+   Format lead: [nomor MIDI, ketukan mulai, durasi ketukan]. Bass: akar di ketukan 1, kuint di ketukan 3. */
+const SONG={title:'Terang di Kiarakoneng',beats:32,
+ lead:[[76,0,1],[79,1,1],[81,2,1],[79,3,1],[76,4,1],[74,5,1],[72,6,2],[74,8,1],[76,9,1],[79,10,1],[76,11,1],[74,12,2],[72,14,1],[69,15,1],[72,16,1],[76,17,1],[79,18,1],[81,19,1],[84,20,1.5],[81,21.5,.5],[79,22,2],[76,24,1],[79,25,1],[76,26,1],[74,27,1],[72,28,4]],
+ bassRoots:[48,41,45,43,48,41,43,48],bassFifth:[55,48,52,50,55,48,50,55]};
+const MCFG={siang:{bpm:100,wave:'triangle',lp:4000,hat:true,rain:false,lv:.14},malam:{bpm:76,wave:'sine',lp:2200,hat:false,rain:false,lv:.18},hujan:{bpm:88,wave:'triangle',lp:1500,hat:false,rain:true,lv:.15}};
+let AC=null,MUS=null,NB=null,musicOn=true,_ms='';
+try{musicOn=localStorage.getItem('sts_music')!=='0'}catch(e){}
+const mf=m=>440*Math.pow(2,(m-69)/12);
+function note(t,m,dur,type,vol,dest){
+  const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=mf(m);
+  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.02);
+  g.gain.exponentialRampToValueAtTime(vol*.35,t+dur*.8);g.gain.exponentialRampToValueAtTime(.0001,t+dur+.12);
+  o.connect(g);g.connect(dest);o.start(t);o.stop(t+dur+.2);
+}
+function noiseBuf(sec){const b=AC.createBuffer(1,Math.floor(AC.sampleRate*sec),AC.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;return b}
+function hat(t,dest){
+  if(!NB)NB=noiseBuf(.06);
+  const s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();
+  s.buffer=NB;f.type='highpass';f.frequency.value=7000;g.gain.setValueAtTime(.035,t);g.gain.exponentialRampToValueAtTime(.0001,t+.05);
+  s.connect(f);f.connect(g);g.connect(dest);s.start(t);
+}
+function playLoop(M,start){
+  const c=M.c,spb=M.spb;
+  SONG.lead.forEach(n=>note(start+n[1]*spb,n[0],n[2]*spb*.95,c.wave,c.lv,M.lpf));
+  for(let b=0;b<8;b++){
+    note(start+b*4*spb,SONG.bassRoots[b],1.9*spb,'sine',.2,M.master);
+    note(start+(b*4+2)*spb,SONG.bassFifth[b],1.9*spb,'sine',.14,M.master);
+    if(c.hat)for(let k=1;k<4;k+=2)hat(start+(b*4+k)*spb,M.master);
+  }
+}
+function _oldMStop(){
+  if(!MUS||!AC)return;
+  const M=MUS;MUS=null;clearInterval(M.timer);
+  M.master.gain.setTargetAtTime(0,AC.currentTime,.1);
+  setTimeout(()=>{try{M.master.disconnect();if(M.rain)M.rain.stop()}catch(e){}},700);
+}
+function _oldMS(key){
+  if(!musicOn)return;
+  try{
+    if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();
+    if(AC.state==='suspended')AC.resume();
+    if(MUS&&MUS.key===key)return;
+    musicStop();
+    const c=MCFG[key],master=AC.createGain(),lpf=AC.createBiquadFilter();
+    master.gain.value=.0001;master.connect(AC.destination);
+    master.gain.setTargetAtTime(1,AC.currentTime,.4);
+    lpf.type='lowpass';lpf.frequency.value=c.lp;lpf.connect(master);
+    const M={key,c,master,lpf,spb:60/c.bpm,next:AC.currentTime+.1,rain:null,timer:0};
+    if(c.rain){
+      const r=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();
+      r.buffer=noiseBuf(2);r.loop=true;f.type='bandpass';f.frequency.value=1100;f.Q.value=.6;g.gain.value=.05;
+      r.connect(f);f.connect(g);g.connect(master);r.start();M.rain=r;
+    }
+    MUS=M;_ms='';
+    const tick=()=>{if(AC.currentTime+3>M.next){playLoop(M,M.next);M.next+=SONG.beats*M.spb}};
+    tick();M.timer=setInterval(tick,500);
+  }catch(e){}
+}
+function musicStart(key){try{parent.postMessage({sa:'music',key:key},'*');if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume()}catch(e){}}
+function musicStop(){}
+function musicTick(){
+  if(!MUS||_ms===state)return;_ms=state;
+  const v=state==='play'?1:state==='pause'?.3:state==='result'?.55:.7;
+  MUS.master.gain.setTargetAtTime(v,AC.currentTime,.25);
+}
+function sfxPerfect(n){
+  if(!musicOn||!AC||AC.state!=='running')return;
+  const sc=[72,74,76,79,81,84,86,88],i=Math.min(Math.max(n,1)-1,6),t=AC.currentTime;
+  note(t,sc[i]+12,.3,'sine',.12,AC.destination);note(t+.07,sc[i+1]+12,.35,'sine',.1,AC.destination);
+}
+function syncMu(){
+  const a=document.getElementById('mu'),b=document.getElementById('mu2');
+  if(a){a.textContent=musicOn?'🔊':'🔇';a.setAttribute('aria-pressed',String(musicOn))}
+  if(b)b.textContent=musicOn?'🔊 Musik: '+SONG.title:'🔇 Musik mati';
+}
+function setMusic(on){
+  musicOn=on;try{localStorage.setItem('sts_music',on?'1':'0')}catch(e){}
+  if(on)musicStart(curKey);else musicStop();
+  syncMu();
+}
+function bindMenu(){
+  document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>startMode(b.dataset.m));
+  const b=document.getElementById('mu2');if(b)b.onclick=()=>setMusic(!musicOn);
+  const l=document.getElementById('lrn');if(l)l.onclick=()=>showLearn(0);
+  syncMu();
+}
+function startMode(m){curKey=m;MODE=MODES[m];TOTAL=MODE.total;ov.classList.add('hide');ov.style.alignItems='center';musicStart(m);reset()}
+document.getElementById('mu').onclick=()=>setMusic(!musicOn);
+document.addEventListener('visibilitychange',()=>{if(AC){if(document.hidden)AC.suspend();else if(musicOn)AC.resume()}});
+const FACTS=[
+ 'PJU tenaga surya menyalakan lampu dari listrik yang dibuat sendiri oleh panel surya, tanpa kabel dari jaringan PLN.',
+ 'Panel surya mengubah cahaya matahari menjadi listrik arus searah atau DC. Listriknya disimpan di baterai untuk dipakai malam hari.',
+ 'Solar charge controller mengatur pengisian dan pemakaian baterai agar tidak terisi berlebihan atau terkuras habis, sehingga baterai lebih awet.',
+ 'Sensor cahaya membuat lampu menyala otomatis saat gelap dan padam saat pagi, tanpa saklar.',
+ 'Lampu LED jauh lebih hemat energi daripada lampu pijar, jadi cocok untuk sistem berdaya terbatas seperti PJU surya.',
+ 'Di wilayah selatan khatulistiwa seperti Pulau Jawa, panel surya biasanya menghadap utara dengan kemiringan kecil.',
+ 'Debu, kotoran burung, dan bayangan pohon mengurangi listrik yang dihasilkan panel. Membersihkannya berkala menjaga lampu tetap terang.',
+ 'Tiang PJU umumnya dilapisi galvanis supaya tahan karat menghadapi hujan dan panas bertahun-tahun.',
+ 'Indonesia berada di wilayah tropis dengan sinar matahari melimpah sepanjang tahun, sangat cocok untuk tenaga surya.',
+ 'Panel yang terlalu panas justru sedikit menurun efisiensinya, jadi cahaya terik tidak selalu berarti listrik maksimal.',
+ 'Dusun yang jauh dari jaringan listrik sangat terbantu PJU surya karena tidak perlu menarik kabel panjang.',
+ 'Sebagian PJU surya bisa meredupkan lampu di tengah malam untuk menghemat energi baterai.'];
+const MFACTS={
+ siang:['Siang hari adalah waktu panel bekerja: setiap jam cahaya matahari yang diterima menjadi energi cadangan untuk malam nanti.'],
+ malam:['Saat malam, lampu hanya memakai listrik yang disimpan baterai sejak siang.','Kapasitas baterai menentukan berapa lama lampu bisa menyala setelah gelap.'],
+ hujan:['Saat mendung atau hujan, panel tetap menghasilkan listrik tetapi jauh lebih sedikit. Karena itu baterai dirancang menyimpan cadangan untuk beberapa hari.','Hujan ikut membersihkan debu dari permukaan panel, tetapi cahaya yang berkurang tetap membuat listrik yang dihasilkan turun.']};
+const LEARN=[
+ {t:'Apa itu PJU tenaga surya?',h:'<p>PJU adalah Penerangan Jalan Umum. Pada PJU tenaga surya, lampu jalan menyala dari listrik yang dihasilkan sendiri oleh panel surya, tanpa kabel dari jaringan PLN.</p><p>Karena itu cocok untuk dusun atau jalan yang jauh dari jaringan listrik, seperti Dusun Kiarakoneng 1 di game ini.</p>'},
+ {t:'Komponen utama',h:'<ul><li><b>Panel surya</b>: mengubah cahaya matahari menjadi listrik.</li><li><b>Baterai</b>: menyimpan listrik untuk malam hari.</li><li><b>Solar charge controller</b>: mengatur pengisian dan pemakaian baterai.</li><li><b>Lampu LED</b>: terang dan hemat energi.</li><li><b>Tiang</b>: menopang semuanya, biasanya galvanis tahan karat.</li></ul><p>Di game: segmen tiang disusun dulu, lalu panel surya dipasang di puncak.</p>'},
+ {t:'Cara kerja siang dan malam',h:'<ul><li><b>Siang</b>: panel menghasilkan listrik, controller mengisi baterai.</li><li><b>Malam</b>: sensor cahaya mendeteksi gelap, lampu LED menyala dari listrik baterai.</li><li><b>Pagi</b>: sensor mematikan lampu dan siklus dimulai lagi.</li></ul><p>Saat mendung atau hujan panel tetap bekerja, tetapi hasilnya jauh lebih kecil, jadi baterai dirancang menyimpan cadangan beberapa hari.</p>'},
+ {t:'Kenapa presisi penting?',h:'<p>Energi yang dihasilkan bergantung pada luas panel yang menangkap cahaya dan arah hadapnya. Di wilayah selatan khatulistiwa seperti Pulau Jawa, panel umumnya menghadap utara dengan kemiringan kecil.</p><p>Bayangan, debu, dan kotoran mengurangi hasilnya. Di game, persentase luas panel terhadap pondasi menentukan kecerahan lampu, dari lampu jalan sampai lilin.</p>'},
+ {t:'Perawatan dan manfaat',h:'<ul><li>Bersihkan permukaan panel dari debu dan kotoran secara berkala.</li><li>Pangkas ranting yang menimbulkan bayangan.</li><li>Periksa baterai dan sambungan kabel.</li></ul><p>Manfaatnya: tanpa tagihan listrik, ramah lingkungan, dan jalan lebih aman di malam hari.</p>'}];
+function showLearn(i){
+  const p=LEARN[i],last=i>=LEARN.length-1;
+  card.innerHTML=`<div class="lp"><h2>${p.t}</h2>${p.h}</div><div class="dots">${LEARN.map((_,k)=>`<i class="${k===i?'on':''}"></i>`).join('')}</div><div class="row"><button id="lb" class="alt">${i?'Sebelumnya':'Kembali'}</button><button id="ln">${last?'Selesai':'Berikutnya'}</button></div>`;
+  ov.style.alignItems='center';ov.classList.remove('hide');
+  document.getElementById('lb').onclick=()=>i?showLearn(i-1):showMenu();
+  document.getElementById('ln').onclick=()=>last?showMenu():showLearn(i+1);
+}
+let eduPool=[],eduKey='',_edu=-1,toastT=0;
+function pickFact(){const p=FACTS.concat(MFACTS[curKey]||[]);return p[Math.random()*p.length|0]}
+function nextFact(){
+  if(eduKey!==curKey||!eduPool.length){eduKey=curKey;eduPool=FACTS.concat(MFACTS[curKey]||[]).sort(()=>Math.random()-.5)}
+  return eduPool.pop();
+}
+function eduTick(){
+  const t=document.getElementById('toast');if(!t)return;
+  if(state!=='play'){t.classList.add('hide');return}
+  const p=layers.length-1;if(p===_edu)return;_edu=p;
+  if(p>0&&p%3===0&&p<TOTAL-1){
+    t.innerHTML='<b>Tahukah kamu?</b>'+nextFact();t.classList.remove('hide');
+    clearTimeout(toastT);toastT=setTimeout(()=>t.classList.add('hide'),5500);
+  }
+}
+function eduResult(p){
+  if(p>=95)return 'Panel terpasang presisi, jadi seluruh sel surya menangkap cahaya. Baterai terisi penuh dan lampu menyala terang sepanjang malam.';
+  if(p>=80)return 'Sebagian kecil permukaan panel hilang. Daya turun sedikit, tetapi baterai masih cukup untuk menyalakan lampu hingga pagi.';
+  if(p>=60)return 'Luas panel berkurang cukup banyak, jadi baterai terisi lebih lambat. Controller bisa meredupkan lampu agar tetap menyala sampai pagi.';
+  if(p>=25)return 'Energi yang terkumpul sangat terbatas, sehingga lampu redup atau cepat padam. Panel yang kotor atau terhalang bayangan punya efek serupa.';
+  return 'Hampir tidak ada energi yang tersimpan, jadi lampu tidak bisa menyala. Itu sebabnya PJU surya dirancang dengan panel dan baterai yang cukup besar.';
+}
+function show(){
+  const T=tier(pct),up=pct>=80,prev=BEST[curKey]||0,rec=pct>prev&&pct>0;
+  if(rec){BEST[curKey]=pct;saveBest(BEST)}
+  card.innerHTML=`${rec?'<div class="rec">Rekor baru</div>':''}<h1>${T[1]}</h1><div class="big">${pct}%</div><div class="meter"><i style="width:${pct}%"></i></div><p>${T[2]}</p>${an()}<div class="edu"><b>Kenapa begitu?</b>${eduResult(pct)}</div><div class="edu"><b>Tahukah kamu?</b>${pickFact()}</div><div class="stat"><span>Perfect ${perfN}</span><span>Combo terbaik ×${maxCombo}</span>${prev?`<span>Rekor ${Math.max(prev,pct)}%</span>`:''}</div><div class="row"><button id="go2">${up?'Main lagi':'Main lagi'}</button><button id="go3" class="alt">Pilih level</button></div>`;
+  ov.style.alignItems='flex-end';ov.classList.remove('hide');
+  document.getElementById('go2').onclick=()=>{ov.classList.add('hide');reset()};
+  document.getElementById('go3').onclick=showMenu;
+}
+function tap(){if(state==='play')place()}
+cv.addEventListener('pointerdown',tap);
+addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();tap()}});
+bindMenu();
+function frame(ts){
+  const dt=Math.min((ts-last)/1000||0,.05);last=ts;
+  if(state==='play'){
+    const t=layers[layers.length-1],a=cur.ax,sp=Math.min(330,(130+level*22+layers.length*3)*MODE.sp);
+    cur[a]+=cur.dir*sp*dt;
+    if(cur[a]>t[a]+185){cur[a]=t[a]+185;cur.dir=-1}
+    if(cur[a]<t[a]-185){cur[a]=t[a]-185;cur.dir=1}
+  }
+  const n=layers.length;
+  const pc=cam;cam+=(Math.max(0,(n-4)*LH)-cam)*Math.min(1,dt*4);parts.forEach(p=>p.y+=(cam-pc)*S);updFx(dt);
+  night+=((state==='result'?1:0)-night)*Math.min(1,dt*1.5);
+  falls.forEach(f=>{f.vy+=900*dt;f.yo-=f.vy*dt});
+  falls=falls.filter(f=>f.yo>-1500);flash.forEach(f=>f.t+=dt*2.2);flash=flash.filter(f=>f.t<1);
+  requestAnimationFrame(frame);draw();
+}
+function draw(){
+  ctx.setTransform(DPR,0,0,DPR,0,0);ctx.translate((Math.random()-.5)*shake*6,(Math.random()-.5)*shake*6);
+  const g=ctx.createLinearGradient(0,0,0,H);
+  const m=(a,b)=>Math.round(a+(b-a)*night);
+  g.addColorStop(0,`rgb(${m(MODE.c0[0],10)},${m(MODE.c0[1],20)},${m(MODE.c0[2],40)})`);
+  g.addColorStop(1,`rgb(${m(MODE.c1[0],22)},${m(MODE.c1[1],40)},${m(MODE.c1[2],50)})`);
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  // camera offset: draw with world shifted by cam (screen px via iso)
+  drawSky();drawVillage();
+  layers.forEach((b,i)=>box(b,i,0,i===TOTAL));
+  if((state==='play'||state==='pause')&&cur){box(cur,layers.length,0,layers.length===TOTAL)}
+  falls.forEach(f=>box(f,f.i,f.yo,f.i===TOTAL));
+  flash.forEach(f=>{const e=f.t*45,hw=f.w/2+e,hd=f.d/2+e,y=f.i*LH+LH;ctx.strokeStyle=`rgba(255,255,255,${1-f.t})`;ctx.lineWidth=3*S;ctx.beginPath();[[-hw,-hd],[hw,-hd],[hw,hd],[-hw,hd]].forEach((q,k)=>{const p=iso(f.x+q[0],f.z+q[1],y);k?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])});ctx.closePath();ctx.stroke()});
+  glow();drawFx();drawRain();
+  if(false){
+    const b=layers[TOTAL],c=iso(b.x,b.z,TOTAL*LH+LH+4);
+    const r=(pct>=90?260:130)*S*night;
+    const rg=ctx.createRadialGradient(c[0],c[1],0,c[0],c[1],r);
+    rg.addColorStop(0,'rgba(255,236,150,.95)');rg.addColorStop(1,'rgba(255,220,100,0)');
+    ctx.fillStyle=rg;ctx.fillRect(0,0,W,H);
+  }
+}
+requestAnimationFrame(frame);
+</script>
+<button id="bkx" aria-label="Kembali ke pilihan game">‹</button>
+<script>(function(){var b=document.getElementById("bkx");b.addEventListener("pointerdown",function(e){e.stopPropagation()});b.addEventListener("click",function(){parent.postMessage("sa-back","*")})})();</script>
+</body>
+</html>

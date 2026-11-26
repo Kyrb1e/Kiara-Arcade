@@ -1,0 +1,338 @@
+/* Tampilan bersama untuk semua game: gaya 3D lembut tanpa garis tepi.
+   Dimuat setelah gaya bawaan tiap game, jadi cukup menimpa bagian antarmuka. */
+
+html,body{font-family:var(--body)!important}
+html:not([data-game="sci"]) body{background:#2f55d6!important}
+button{font-family:var(--body)!important;text-transform:none!important;letter-spacing:0!important;-webkit-text-stroke:0!important}
+
+/* ================= Panel menu, jeda, hasil ================= */
+html:not([data-game="sci"]) .card{
+  --ink:#fff!important;
+  position:relative;
+  background:linear-gradient(180deg,#9fdcff 0%,#5aa2ff 34%,#3b6ff0 100%)!important;
+  color:#fff!important;border:0!important;border-radius:32px!important;
+  padding:24px 20px 22px!important;
+  box-shadow:inset 0 3px 0 rgba(255,255,255,.7),inset 0 0 0 3px rgba(255,255,255,.3),inset 0 -8px 0 rgba(20,50,170,.25),0 30px 60px rgba(15,35,120,.45)!important;
+  backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+  animation:kpop .35s cubic-bezier(.2,1.5,.4,1) both;
+}
+html:not([data-game="sci"]) .card h1{
+  font-family:var(--display)!important;font-weight:400!important;
+  font-size:38px!important;line-height:1.05!important;letter-spacing:.02em!important;text-transform:none!important;
+  color:#fff!important;-webkit-text-stroke:0!important;
+  text-shadow:0 3px 0 rgba(30,60,180,.45),0 8px 18px rgba(20,50,150,.3)!important;
+  margin:0 0 8px!important;
+}
+html:not([data-game="sci"]) .card .sub{
+  display:inline-block;font-family:var(--body)!important;font-weight:600!important;
+  font-size:14.5px!important;letter-spacing:0!important;text-transform:none!important;
+  color:#fff!important;opacity:1!important;
+  background:rgba(255,255,255,.22);box-shadow:inset 0 1px 0 rgba(255,255,255,.6);
+  padding:6px 16px!important;margin:2px 0 12px!important;border-radius:999px;
+}
+html:not([data-game="sci"]) .card p,
+html:not([data-game="sci"]) .card .how,
+html:not([data-game="sci"]) .card .how2{color:#fff!important;opacity:1!important;font-weight:500}
+.card .logo{display:none!important}
+
+/* cara main */
+.how2,.card div.how{
+  background:rgba(255,255,255,.18);border-radius:20px;padding:12px 14px!important;margin:6px 0 4px!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5);gap:7px!important;
+}
+.how2 span,.card div.how span{position:relative;display:block;padding-left:22px;line-height:1.35}
+.how2 span::before,.card div.how span::before{
+  content:"";position:absolute;left:0;top:.2em;width:13px;height:13px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#fff3a8,#ffcf3d 45%,#f59a0c);box-shadow:inset 0 -2px 0 #d9780a;
+}
+
+/* ================= Tombol ================= */
+html:not([data-game="sci"]) .card button{
+  font-family:var(--display)!important;font-weight:400!important;font-size:20px!important;letter-spacing:.02em!important;
+  color:#fff!important;text-shadow:0 2px 0 rgba(170,80,0,.45);
+  background:linear-gradient(180deg,#ffe27a 0%,#ffb21e 45%,#ff8a00 100%)!important;
+  border:0!important;border-radius:999px!important;
+  min-height:52px;margin-top:16px!important;
+  box-shadow:inset 0 3px 0 rgba(255,255,255,.65),inset 0 -6px 0 #d96a00,0 10px 20px rgba(150,70,0,.3)!important;
+  transition:transform .08s ease,box-shadow .08s ease;
+}
+html:not([data-game="sci"]) .card button:active{
+  transform:translateY(3px)!important;
+  box-shadow:inset 0 3px 0 rgba(255,255,255,.65),inset 0 -3px 0 #d96a00,0 5px 12px rgba(150,70,0,.3)!important;
+}
+html:not([data-game="sci"]) .card button.alt,
+html:not([data-game="sci"]) .card .alt{
+  color:#2f55d6!important;text-shadow:none;
+  background:linear-gradient(180deg,#ffffff,#e6eeff)!important;
+  box-shadow:inset 0 -6px 0 #c3d3ff,0 10px 20px rgba(20,50,150,.25)!important;
+}
+html:not([data-game="sci"]) .card .play{
+  width:100px!important;height:100px!important;min-height:0;border-radius:50%!important;margin:18px auto 6px!important;
+  background:linear-gradient(180deg,#c8ffa0 0%,#7be04f 40%,#3fbf2c 100%)!important;
+  box-shadow:inset 0 3px 0 rgba(255,255,255,.7),inset 0 -7px 0 #2f9a22,0 12px 24px rgba(20,90,30,.35)!important;
+}
+html:not([data-game="sci"]) .card .play svg{filter:drop-shadow(0 2px 0 rgba(20,110,20,.45))}
+html:not([data-game="sci"]) .card .row{gap:12px!important}
+html:not([data-game="sci"]) .card button:disabled{opacity:.5!important;filter:grayscale(.5)}
+button:focus-visible{outline:3px solid #fff!important;outline-offset:4px!important}
+
+/* pilihan level Kiara Stack */
+html:not([data-game="sci"]) .card button.lv{
+  font-family:var(--body)!important;font-size:14px!important;text-shadow:none;
+  color:#22397f!important;border-radius:22px!important;
+  background:linear-gradient(180deg,#ffffff,#e6eeff)!important;
+  box-shadow:inset 0 -5px 0 #c3d3ff,0 8px 16px rgba(20,50,150,.22)!important;
+  margin-top:4px!important;
+}
+html:not([data-game="sci"]) .card button.lv .tx b{font-family:var(--display);font-weight:400;font-size:20px;color:#2344b8}
+html:not([data-game="sci"]) .card button.lv .ic{
+  width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(180deg,#5aa2ff,#2f55d6);box-shadow:inset 0 2px 0 rgba(255,255,255,.4)
+}
+.lvls{gap:12px!important}
+/* item toko Kiara Dash */
+html:not([data-game="sci"]) .card button.it{
+  font-family:var(--body)!important;font-size:13px!important;min-height:0;margin-top:0!important;text-shadow:none;
+  border-radius:18px!important;
+  background:rgba(255,255,255,.2)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5)!important;
+}
+html:not([data-game="sci"]) .card button.it.sel{background:rgba(255,226,122,.35)!important;box-shadow:inset 0 0 0 3px #ffe27a!important}
+/* tombol level Kiara Beam */
+html:not([data-game="sci"]) .card .lvg button{min-height:58px;margin:0!important;border-radius:18px!important}
+html:not([data-game="sci"]) .card .lvg{gap:12px 8px!important}
+.lvg b{font-size:22px!important}
+.lvg small{color:#fff;font-size:11px!important;opacity:.9}
+
+/* ================= Kotak info dan angka ================= */
+.edu{
+  background:rgba(255,255,255,.18)!important;color:#fff!important;
+  border-radius:20px!important;padding:12px 14px!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5);font-weight:500;
+}
+.edu b{font-family:var(--display);font-weight:400;font-size:16px!important;letter-spacing:.02em;color:#fff3a0!important;margin-bottom:2px}
+.rec{
+  font-family:var(--display);font-weight:400!important;font-size:16px!important;letter-spacing:.02em;
+  background:linear-gradient(180deg,#ffe27a,#ffb21e 50%,#ff8a00)!important;color:#fff!important;text-shadow:0 1px 0 rgba(170,80,0,.45);
+  padding:6px 18px!important;border-radius:999px!important;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.6),inset 0 -4px 0 #d96a00,0 6px 14px rgba(150,70,0,.3);margin-bottom:12px!important;
+}
+.stat{font-weight:600}
+.stat span,.card .chips span{background:rgba(255,255,255,.2)!important;border-radius:999px!important;padding:5px 12px!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.5)}
+.best{font-family:var(--display);font-weight:400!important;color:#fff3a0!important;letter-spacing:.03em!important}
+.big{
+  font-family:var(--display)!important;font-weight:400!important;line-height:1!important;
+  color:#fff3a0!important;-webkit-text-stroke:0!important;
+  text-shadow:0 2px 0 #ffb21e,0 4px 0 #f59a0c,0 6px 0 #e0800a,0 8px 0 #c86c08,0 18px 30px rgba(15,35,120,.4)!important;
+}
+.lab{font-family:var(--display);letter-spacing:.06em!important;opacity:.85}
+.fact{font-weight:500}
+.meter{height:14px!important;border-radius:999px!important;background:rgba(255,255,255,.25)!important;box-shadow:inset 0 2px 3px rgba(0,0,0,.15)}
+.meter i{background:linear-gradient(180deg,#ffe27a,#ff8a00)!important;border-radius:999px}
+.net{color:#fff}
+
+/* layar hasil penuh */
+#ov[style*="flex-end"]{background:radial-gradient(55% 35% at 50% 28%,rgba(255,255,255,.5),rgba(255,255,255,0) 70%),linear-gradient(180deg,#a8f0d8 0%,#6fd8f5 20%,#4aa8ff 48%,#3b6ff0 78%,#2f55d6 100%)!important}
+#ov[style*="flex-end"]::before{
+  content:"";position:fixed;left:50%;top:30%;width:900px;height:900px;margin:-450px 0 0 -450px;pointer-events:none;
+  background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.16) 0deg 9deg,transparent 9deg 22deg);
+  -webkit-mask-image:radial-gradient(circle,#000 0%,transparent 50%);mask-image:radial-gradient(circle,#000 0%,transparent 50%);
+  animation:kspin 50s linear infinite;
+}
+#ov[style*="flex-end"] .card{position:relative;z-index:1;background:transparent!important;box-shadow:none!important;padding:0!important;animation:none}
+#ov[style*="flex-end"] .card:has(.big)::before{
+  content:"Hasil"!important;display:table!important;margin:0 auto 18px!important;
+  font-family:var(--display);font-size:18px!important;letter-spacing:.04em!important;opacity:1!important;
+  color:#2f55d6;background:linear-gradient(180deg,#fff,#e6eeff);
+  padding:7px 24px;border-radius:999px;box-shadow:inset 0 -4px 0 #c3d3ff,0 8px 16px rgba(20,50,150,.22);
+}
+#ov[style*="flex-end"] .big{font-size:108px!important;animation:kpop .5s cubic-bezier(.2,1.6,.4,1) both}
+#ov[style*="flex-end"] .card h1{font-size:34px!important}
+#ov[style*="flex-end"] .lab{display:none!important}
+.card .fact{
+  background:rgba(255,255,255,.18);border-radius:20px;padding:12px 14px!important;margin-top:16px!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5);text-align:left;font-size:13.5px!important;opacity:1!important;
+}
+.card .fact::before{content:"Tahukah kamu?";display:block;font-family:var(--display);color:#fff3a0;font-size:16px;letter-spacing:.02em;margin-bottom:2px}
+
+/* ================= Tombol & panel di atas layar game ================= */
+#bkx,#pz,#rst,#mnb,.btns button{
+  background:linear-gradient(180deg,#ffffff,#e3ecff)!important;
+  color:#3b6ff0!important;border:0!important;border-radius:50%!important;
+  box-shadow:inset 0 -3px 0 #c6d6ff,0 4px 10px rgba(20,50,150,.3)!important;
+}
+#bkx{font-family:var(--display)!important;font-size:28px!important}
+.pnl,#toast,#hint{
+  background:rgba(255,255,255,.9)!important;color:#22397f!important;
+  border-radius:20px!important;
+  box-shadow:inset 0 -3px 0 #dbe6ff,0 8px 20px rgba(20,50,150,.25)!important;
+  backdrop-filter:none!important;-webkit-backdrop-filter:none!important;text-shadow:none!important;
+  font-weight:500;
+}
+#hint{border-radius:999px!important}
+#toast b{font-family:var(--display);font-weight:400!important;letter-spacing:.02em;color:#f08a00!important}
+#cmb{font-family:var(--display);font-weight:400!important;color:#f08a00!important}
+#ttl,#lvl{font-family:var(--display);font-weight:400!important;letter-spacing:.02em;color:#2344b8}
+#seg{font-family:var(--display);font-weight:400!important;color:#2344b8}
+
+.ctl{
+  background:rgba(255,255,255,.3)!important;
+  color:#fff!important;border-radius:28px!important;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.6),inset 0 -5px 0 rgba(20,50,150,.25),0 8px 18px rgba(0,0,0,.2)!important;
+  backdrop-filter:blur(4px)!important;-webkit-backdrop-filter:blur(4px)!important;
+}
+.ctl.on{background:linear-gradient(180deg,#ffe27a,#ff8a00)!important;color:#fff!important;transform:translateY(3px)}
+
+/* musik diatur dari halaman utama */
+#mu,#mu2{display:none!important}
+
+/* tata letak tombol kembali */
+html[data-game="stack"] #info{margin-right:0!important}
+
+/* ================= Kiara Lab, tema terang ================= */
+html[data-game="sci"]{
+  --bg:#eef5ff!important;
+  --card:#fff!important;
+  --ink:#22397f!important;
+  --mut:#5b6b96!important;
+  --pri:#3b6ff0!important;
+  --pri2:#ffb21e!important;
+  --line:#dbe6ff!important;
+  --soft:#eaf1ff!important;
+  --warn:#fff4d6!important;
+}
+html[data-game="sci"] body{background:linear-gradient(180deg,#e6fbf5,#eef5ff 240px)!important;color:#22397f!important;font-weight:500}
+html[data-game="sci"] header h1{
+  font-family:var(--display)!important;font-weight:400!important;font-size:34px!important;letter-spacing:.02em;
+  color:#3b6ff0!important;text-shadow:0 3px 0 #c6d6ff!important;
+}
+html[data-game="sci"] h2,html[data-game="sci"] h3{font-family:var(--display);font-weight:400;letter-spacing:.02em;color:#2f55d6}
+html[data-game="sci"] .card{border-radius:24px!important;box-shadow:0 10px 24px rgba(40,80,180,.1),inset 0 -4px 0 #e3ebff!important;margin:18px 0!important}
+html[data-game="sci"] #sn button,html[data-game="sci"] #nav button,html[data-game="sci"] .seg button{
+  font-weight:600!important;border-radius:999px!important;background:#fff!important;color:#2f55d6!important;
+  box-shadow:inset 0 -3px 0 #dbe6ff,0 4px 10px rgba(40,80,180,.1)!important;
+}
+html[data-game="sci"] #sn button.on,html[data-game="sci"] #nav button.on,html[data-game="sci"] .seg button.on,html[data-game="sci"] .btn{
+  background:linear-gradient(180deg,#7fb8ff,#3b6ff0)!important;color:#fff!important;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.5),inset 0 -4px 0 #2747c0,0 6px 14px rgba(40,80,180,.25)!important;
+}
+html[data-game="sci"] .prog{height:10px!important;border-radius:999px!important}
+html[data-game="sci"] .prog i{background:linear-gradient(180deg,#ffe27a,#ff8a00)!important}
+html[data-game="sci"] #mchip{
+  font-family:var(--display)!important;font-weight:400!important;letter-spacing:.02em;
+  background:linear-gradient(180deg,#ffe27a,#ffb21e 50%,#ff8a00)!important;color:#fff!important;text-shadow:0 1px 0 rgba(170,80,0,.4);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.6),inset 0 -3px 0 #d96a00!important;
+}
+html[data-game="sci"] #gate{background:radial-gradient(55% 35% at 50% 28%,rgba(255,255,255,.5),rgba(255,255,255,0) 70%),linear-gradient(180deg,#a8f0d8 0%,#6fd8f5 22%,#4aa8ff 50%,#3b6ff0 78%,#2f55d6 100%)!important}
+html[data-game="sci"] #gate h2{font-family:var(--display);font-weight:400;font-size:38px;letter-spacing:.02em;color:#fff;text-shadow:0 3px 0 rgba(30,60,180,.45),0 8px 18px rgba(20,50,150,.3)}
+html[data-game="sci"] #gate p{color:#fff!important}
+html[data-game="sci"] .gb .e{display:none}
+html[data-game="sci"] .gb{
+  padding:20px!important;border-radius:26px!important;transition:transform .12s ease;
+  box-shadow:inset 0 3px 0 rgba(255,255,255,.55),inset 0 -6px 0 rgba(0,0,0,.12),0 14px 26px rgba(15,35,120,.3)!important;
+}
+html[data-game="sci"] .gb:hover{transform:translateY(-3px)}
+html[data-game="sci"] .gb[data-m="civ"]{background:linear-gradient(180deg,#d6b4ff,#8a4cf0)!important}
+html[data-game="sci"] .gb[data-m="umum"]{background:linear-gradient(180deg,#8ff0d8,#18a99a)!important}
+html[data-game="sci"] .gb b{font-family:var(--display);font-weight:400;color:#fff!important;font-size:26px!important;text-shadow:0 2px 0 rgba(0,0,0,.15)}
+html[data-game="sci"] .gb span span{color:#fff!important;font-weight:600;font-size:14px!important}
+html[data-game="sci"] .mt b,html[data-game="sci"] th{color:#f08a00!important}
+html[data-game="sci"] .tiles .warn{background:#ffb21e!important;color:#fff!important}
+html[data-game="sci"] .q button{border-radius:16px!important;font-weight:500}
+html[data-game="sci"] .eq{font-weight:400}
+
+/* ================= Animasi ================= */
+@keyframes kspin{to{transform:rotate(360deg)}}
+@keyframes kpop{from{transform:scale(.7);opacity:0}}
+@media (prefers-reduced-motion:reduce){#ov::before,.card,.big{animation:none!important}}
+
+/* ================= Tombol musik di dalam game ================= */
+#kmus{
+  position:fixed;z-index:60;top:calc(env(safe-area-inset-top,0px) + 10px);right:62px;
+  width:42px;height:42px;margin:0;padding:0;border:0;border-radius:50%;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(180deg,#ffffff,#e3ecff)!important;color:#3b6ff0!important;
+  box-shadow:inset 0 -3px 0 #c6d6ff,0 4px 10px rgba(20,50,150,.3)!important;
+}
+#kmus svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+#kmus.off{color:#9aa8d6!important}
+#bkx{z-index:60!important}
+
+/* ================= Tombol kembali ke beranda di setiap kartu ================= */
+html:not([data-game="sci"]) .card button.khome{
+  display:block;width:auto!important;min-height:0!important;margin:14px auto 0!important;padding:8px 18px!important;
+  font-family:var(--body)!important;font-weight:600!important;font-size:15px!important;letter-spacing:0!important;
+  color:#fff!important;text-shadow:none!important;
+  background:rgba(255,255,255,.2)!important;border-radius:999px!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5)!important;
+}
+html:not([data-game="sci"]) .card button.khome:hover{background:rgba(255,255,255,.3)!important}
+html:not([data-game="sci"]) .card button.khome::before{content:"\2039";font-family:var(--display);font-size:18px;margin-right:8px}
+
+/* ================= Perapian ================= */
+/* judul kecil di dalam kartu tidak menempel ke isi di atasnya */
+html:not([data-game="sci"]) .card div + .sub{margin-top:22px!important}
+/* layar hasil yang bisa digulir: sembunyikan batang gulir supaya tombol tidak mepet */
+#ov{scrollbar-width:none}
+#ov::-webkit-scrollbar{display:none}
+/* analisis Kiara Stack cukup grafik dan satu baris ringkas */
+.an p{display:none!important}
+.an p:nth-of-type(3){display:block!important;opacity:.95;font-weight:600}
+.an b{font-family:var(--display);font-weight:400;letter-spacing:.04em!important;text-transform:none!important;font-size:16px!important;color:#fff3a0;opacity:1!important}
+.an .bars{border-bottom-color:rgba(255,255,255,.5)!important}
+.an .bars i{background:rgba(255,255,255,.6)!important;border-radius:6px 6px 0 0!important}
+.an .bars i.pf{background:#ffe27a!important}
+.an .bars i.pw{background:#ff8f7a!important}
+/* Kiara Lab: kartu tanpa ruang kosong di atas judulnya */
+html[data-game="sci"] .card>h3:first-child,html[data-game="sci"] .card>h2:first-child{margin-top:0!important}
+/* Kiara Lab: daftar bab tidak masuk ke bawah tombol kanan atas */
+html[data-game="sci"] #sn,html[data-game="sci"] #nav{margin-right:0!important;padding-right:132px!important;padding-top:12px!important;padding-bottom:12px!important}
+html[data-game="sci"] header{padding-right:120px!important}
+
+/* ================= Tombol kanan atas sama di semua game =================
+   Urutan dari kanan: kembali, lalu musik. Tombol milik game sendiri bergeser ke kirinya. */
+#bkx{top:calc(env(safe-area-inset-top,0px) + 12px)!important;right:12px!important;width:44px!important;height:44px!important;margin:0!important}
+#kmus{top:calc(env(safe-area-inset-top,0px) + 12px)!important;right:64px!important;width:44px!important;height:44px!important}
+html[data-game="dash"] #pz,html[data-game="drive"] #pz{top:calc(env(safe-area-inset-top,0px) + 12px)!important;right:116px!important;width:44px!important;height:44px!important}
+html[data-game="stack"] #hud,html[data-game="grid"] #hud{padding-right:116px!important;padding-top:12px!important}
+html[data-game="stack"] .btns,html[data-game="grid"] .btns{gap:8px!important}
+html[data-game="stack"] .btns button,html[data-game="grid"] .btns button{width:44px!important;height:44px!important}
+
+/* ================= Kiara Lab: kotak angka rapi sejajar ================= */
+html[data-game="sci"] .res div,html[data-game="sci"] .tiles div{position:relative;padding:12px 14px 46px!important;border-radius:16px!important;line-height:1.3}
+html[data-game="sci"] .res b,html[data-game="sci"] .tiles b{
+  position:absolute;left:14px;right:10px;bottom:12px;
+  font-family:var(--display);font-weight:400;font-size:17px!important;line-height:1.2;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+html[data-game="sci"] .res b{color:#22397f!important}
+html[data-game="sci"] canvas{border-radius:16px!important}
+html[data-game="sci"] .res{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))!important}
+
+/* ================= Penyesuaian layar HP ================= */
+/* Kiara Lab: area tombol kanan atas diberi latar supaya teks yang digulir tidak terlihat di belakangnya */
+html[data-game="sci"] body::before{
+  content:"";position:fixed;z-index:6;top:0;right:0;width:126px;height:calc(env(safe-area-inset-top,0px) + 60px);
+  background:linear-gradient(90deg,rgba(238,245,255,0),#eef5ff 14px);pointer-events:none;
+}
+@media (max-width:520px){
+  /* Kiara Dash dan Drive: tombol jeda turun ke bawah tombol kembali agar skor di tengah tidak tertutup */
+  html[data-game="dash"] #pz,html[data-game="drive"] #pz{top:calc(env(safe-area-inset-top,0px) + 64px)!important;right:12px!important}
+}
+/* Kiara Stack: panel info tidak pernah menyempit, panel tiang yang menyesuaikan */
+html[data-game="stack"] #hud{gap:8px!important}
+html[data-game="stack"] #info{flex:none!important;white-space:nowrap!important;min-width:0!important;margin-left:auto}
+html[data-game="stack"] #left{flex:0 1 auto!important;min-width:0!important;padding:10px 14px!important}
+html[data-game="stack"] .pips{width:min(34vw,230px)!important;gap:3px!important}
+/* panel progres tiang: kotak yang sudah tersusun berwarna, yang sedang disusun berkedip oranye */
+html[data-game="stack"] #seg::before{content:"Progres tiang";display:block;margin-bottom:7px;font-family:var(--display);font-size:14px;letter-spacing:.02em;color:#2344b8;line-height:1}
+.pip{height:12px!important;border-radius:4px!important;background:#dbe6ff;box-shadow:inset 0 -2px 0 rgba(35,68,184,.12)!important}
+.pip.cur{background:#ffb21e}
+#cmb:empty{display:none}
+#cmb{margin-top:6px!important;font-size:18px!important;min-height:0!important}
+@media (max-width:760px){html[data-game="stack"] #lvl{display:none}}
+@media (max-width:520px){
+  html[data-game="stack"] #info{display:none!important}
+  html[data-game="stack"] #left{flex:1 1 auto!important}
+  html[data-game="stack"] .pips{width:100%!important}
+}
