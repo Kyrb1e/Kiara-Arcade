@@ -150,3 +150,33 @@ function hmStart(key) {
 }
 function hmTitle() { const s = SONGS[hKey]; return s ? s.title : ''; }
 document.addEventListener('visibilitychange', () => { if (hAC) { if (document.hidden) hAC.suspend(); else if (hOn) hAC.resume(); } });
+
+/* ---------- Membuka audio di HP ----------
+   Browser HP baru mengizinkan suara setelah layar disentuh. Pada sentuhan pertama,
+   pemutar audio dibuat dan dibangunkan. Di iPhone, sebuah audio senyap ikut diputar
+   supaya musik tetap terdengar walau tombol senyap aktif. */
+let hUnlocked = false, hSilent = null;
+function silentWav() {
+  const n = 8000, b = new ArrayBuffer(44 + n * 2), v = new DataView(b);
+  const w = (o, t) => { for (let i = 0; i < t.length; i++) v.setUint8(o + i, t.charCodeAt(i)); };
+  w(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); w(8, 'WAVE'); w(12, 'fmt ');
+  v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, 8000, true); v.setUint32(28, 16000, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+  w(36, 'data'); v.setUint32(40, n * 2, true);
+  return URL.createObjectURL(new Blob([b], { type: 'audio/wav' }));
+}
+function hUnlock() {
+  try {
+    if (navigator.audioSession) navigator.audioSession.type = 'playback';
+    if (!hAC) hAC = new (window.AudioContext || window.webkitAudioContext)();
+    if (hAC.state !== 'running') hAC.resume();
+    if (!hUnlocked) {
+      const s = hAC.createBufferSource(); s.buffer = hAC.createBuffer(1, 1, 22050); s.connect(hAC.destination); s.start(0);
+      hSilent = new Audio(silentWav()); hSilent.loop = true; hSilent.setAttribute('playsinline', '');
+      const p = hSilent.play(); if (p && p.catch) p.catch(() => {});
+      hUnlocked = true;
+    } else if (hSilent && hSilent.paused) { const p = hSilent.play(); if (p && p.catch) p.catch(() => {}); }
+    if (hOn && hKey && !hM) hmStart(hKey);
+  } catch (e) {}
+}
+['pointerdown', 'touchend', 'click', 'keydown'].forEach(ev => addEventListener(ev, hUnlock, { capture: true, passive: true }));

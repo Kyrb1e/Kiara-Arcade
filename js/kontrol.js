@@ -36,6 +36,11 @@
     add();
   }
 
+  /* beri tahu halaman utama setiap ada sentuhan, supaya audio di HP tetap menyala */
+  ['pointerdown', 'touchend'].forEach(function (ev) {
+    addEventListener(ev, function () { parent.postMessage({ sa: 'tap' }, '*'); }, { capture: true, passive: true });
+  });
+
   function start() { musicButton(); homeButtons(); }
   if (document.body) start(); else document.addEventListener('DOMContentLoaded', start);
 })();
