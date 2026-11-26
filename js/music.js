@@ -176,7 +176,7 @@ function hUnlock() {
       const p = hSilent.play(); if (p && p.catch) p.catch(() => {});
       hUnlocked = true;
     } else if (hSilent && hSilent.paused) { const p = hSilent.play(); if (p && p.catch) p.catch(() => {}); }
-    if (hOn && hKey && !hM) hmStart(hKey);
+    if (hOn && hKey && !hM && document.getElementById('play') && !document.getElementById('play').classList.contains('hide')) hmStart(hKey);
   } catch (e) {}
 }
 ['pointerdown', 'touchend', 'click', 'keydown'].forEach(ev => addEventListener(ev, hUnlock, { capture: true, passive: true }));

@@ -41,6 +41,19 @@
     addEventListener(ev, function () { parent.postMessage({ sa: 'tap' }, '*'); }, { capture: true, passive: true });
   });
 
-  function start() { musicButton(); homeButtons(); }
+  /* tombol Suara bawaan game (Dash, Drive) mengatur efek suara dan musik sekaligus */
+  function soundButton() {
+    var card = document.getElementById('card');
+    if (!card) return;
+    card.addEventListener('click', function (e) {
+      if (!e.target.closest || !e.target.closest('#sn')) return;
+      setTimeout(function () {
+        var b = document.getElementById('sn');
+        if (b) parent.postMessage({ sa: 'music-set', on: /nyala/i.test(b.textContent) }, '*');
+      }, 30);
+    });
+  }
+
+  function start() { musicButton(); homeButtons(); soundButton(); }
   if (document.body) start(); else document.addEventListener('DOMContentLoaded', start);
 })();

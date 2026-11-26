@@ -1,4 +1,4 @@
-const VERSI = '202611261509'; /* naikkan angka ini setiap ada perubahan supaya browser memuat file terbaru */
+const VERSI = '202611261515'; /* naikkan angka ini setiap ada perubahan supaya browser memuat file terbaru */
 /* Halaman utama Kiara Arcade: lobi, kartu cerita dari Pijar, dan pemutar game.
    Tiap game ada di folder games/ dan dibuka di dalam iframe. Ilustrasi ada di art.js. */
 
@@ -80,6 +80,7 @@ function openGame(k) {
 }
 function closeGame() {
   hmStop();
+  hKey = null; /* di lobi tidak ada musik, jadi sentuhan di lobi tidak menyalakannya lagi */
   if (frame) { frame.remove(); frame = null; }
   play.classList.add('hide');
   document.documentElement.style.overflow = '';
@@ -107,6 +108,12 @@ addEventListener('message', e => {
     hOn = !hOn;
     try { localStorage.setItem('kiara_music', hOn ? '1' : '0'); } catch (err) {}
     if (hOn) { hUnlock(); hmStart(hKey); } else hmStop();
+    tellMusic();
+  } else if (d && d.sa === 'music-set') {
+    /* tombol Suara bawaan game ikut mengatur musik */
+    hOn = !!d.on;
+    try { localStorage.setItem('kiara_music', hOn ? '1' : '0'); } catch (err) {}
+    if (hOn) { hUnlock(); hmStart(hKey || lastKey); } else hmStop();
     tellMusic();
   } else if (d && d.sa === 'music') {
     /* Kiara Stack memberi tahu level yang dipilih: siang, malam, atau hujan */
